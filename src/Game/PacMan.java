@@ -4,6 +4,7 @@ import Actors.Player;
 import Enums.SimpleDirection;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
@@ -21,32 +22,49 @@ public class PacMan extends Application {
         PacMan.launch();
     }
 
-    private Stage stage;
     public FXGraphics2D graphics;
 
-    private Label scoreCounter = new Label("");
-    private World world = new World(this);
+    private final Label scoreCounter = new Label("");
+    private final World world = new World(this);
+    private int level = 1;
+    private final Label levelLabel = new Label("Level: " + level);
 
-    private Player player = new Player(this, world);
+    private final Label credits = new Label("Pac-Man by LarsingDash");
+    private final Label victoryLabel = new Label("VICTORY");
+    private final HBox info = new HBox(scoreCounter, credits, levelLabel);
+
+    private final Player player = new Player(world);
     private SimpleDirection playerDirection = SimpleDirection.NONE;
+
+    private boolean hasWon = false;
+    private boolean isVictoryVisible = false;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        stage = primaryStage;
-
         Canvas canvas = new Canvas(630, 660);
         canvas.setScaleY(-1);
         graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
         graphics.setBackground(Color.BLACK);
 
-        HBox info = new HBox(scoreCounter);
+        updateInfoBox();
+        info.setMinHeight(21);
+
+        scoreCounter.setMinWidth(210);
+        credits.setMinWidth(210);
+        levelLabel.setMinWidth(210);
+        victoryLabel.setMinWidth(210);
+
+        scoreCounter.setAlignment(Pos.CENTER);
+        credits.setAlignment(Pos.CENTER);
+        levelLabel.setAlignment(Pos.CENTER);
+        victoryLabel.setAlignment(Pos.CENTER);
 
         VBox layout = new VBox(info, canvas);
         Scene scene = new Scene(layout);
         scene.setOnKeyPressed(this::key);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+        primaryStage.show();
 
         new AnimationTimer() {
             long last = -1;
@@ -77,6 +95,10 @@ public class PacMan extends Application {
 
     private void update(int i) {
         if (i % 3 == 0) player.update();
+        if (hasWon && i % 20 == 0) {
+            isVictoryVisible = !isVictoryVisible;
+            updateInfoBox();
+        }
     }
 
     private void drawObjects() {
@@ -106,18 +128,34 @@ public class PacMan extends Application {
 
         if (isValidInput) {
             player.setBufferedDirection(playerDirection);
+
+            if (hasWon) {
+                hasWon = false;
+                isVictoryVisible = false;
+                updateInfoBox();
+            }
         }
     }
 
-    public SimpleDirection getPlayerDirection() {
-        return playerDirection;
-    }
-
-    public void setPlayerDirection(SimpleDirection playerDirection) {
-        this.playerDirection = playerDirection;
-    }
-
     public void updateScore(String text) {
-        scoreCounter.setText(text);
+        scoreCounter.setText("Score: " + text);
+    }
+
+    private void updateInfoBox() {
+        if (isVictoryVisible) {
+            info.getChildren().set(1, victoryLabel);
+        } else {
+            info.getChildren().set(1, credits);
+        }
+    }
+
+    public void victory() {
+        hasWon = true;
+
+        level++;
+        levelLabel.setText("Level: " + level);
+
+        world.reset();
+        player.reset();
     }
 }

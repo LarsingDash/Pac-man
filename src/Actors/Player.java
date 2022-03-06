@@ -2,23 +2,24 @@ package Actors;
 
 import Enums.SimpleDirection;
 import Enums.TileState;
-import Game.PacMan;
 import Game.World;
 import org.jfree.fx.FXGraphics2D;
 
 import java.awt.*;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 
 public class Player {
     //Game
-    private final PacMan controller;
-    private World world;
+    private final World world;
 
     private static final Point leftTeleporter =new Point(1, 11);
     private static final Point rightTeleporter =new Point(19, 11);
 
     //Moving
-    private Point position;
+    private Point position = new Point(100, 90);
 
     //Directions
     private SimpleDirection currentDirection = SimpleDirection.NONE;
@@ -30,16 +31,14 @@ public class Player {
     private boolean isOpen = true;
     private int counter = 0;
 
-    public Player(PacMan controller, World world) {
+    public Player(World world) {
         Ellipse2D.Double eye = new Ellipse2D.Double(10, 17.5, 7.5, 7.5);
         open.add(new Area(new Arc2D.Double(0, 0, 30, 30, 45, 270, Arc2D.PIE)));
         open.subtract(new Area(eye));
         closed.add(new Area(new Arc2D.Double(0, 0, 30, 30, 20, 320, Arc2D.PIE)));
         closed.subtract(new Area(eye));
 
-        this.controller = controller;
         this.world = world;
-        this.position = new Point(100, 90);
     }
 
     public void update() {
@@ -189,5 +188,11 @@ public class Player {
         if (newBufferedDirection != currentDirection) {
             bufferedDirection = newBufferedDirection;
         }
+    }
+
+    public void reset() {
+        position = new Point(100, 90);
+        bufferedDirection = SimpleDirection.NONE;
+        currentDirection = SimpleDirection.NONE;
     }
 }

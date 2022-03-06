@@ -14,11 +14,12 @@ public class World {
     private PacMan controller;
 
     private HashMap<Point, TileState> tiles = new HashMap<>();
+    private HashMap<Point, TileState> startingTiles;
     private BufferedImage world;
     private BufferedImage coin;
 
     private int score = 0;
-    private int maxScore = 0;
+    public int maxScore = 0;
 
     public World(PacMan controller) {
         this.controller = controller;
@@ -84,6 +85,7 @@ public class World {
             }
         }
 
+        startingTiles = new HashMap<>(tiles);
         updateScore();
     }
 
@@ -105,9 +107,19 @@ public class World {
         tiles.put(tile, TileState.EMPTY);
         score++;
         updateScore();
+
+        if (score == 5) {
+            controller.victory();
+        }
     }
 
     private void updateScore() {
-        controller.updateScore(score + " / " + maxScore);
+        controller.updateScore(score + "\t/\t" + maxScore);
+    }
+
+    public void reset() {
+        score = 0;
+        tiles = new HashMap<>(startingTiles);
+        updateScore();
     }
 }
