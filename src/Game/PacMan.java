@@ -25,9 +25,9 @@ public class PacMan extends Application {
     public FXGraphics2D graphics;
 
     private final Label scoreCounter = new Label("");
-    private final World world = new World(this);
     private int level = 1;
-    private final Label levelLabel = new Label("Level: " + level);
+    private final World world = new World(this);
+    private final Label levelLabel = new Label("Level: " + level + "\t/\t10");
 
     private final Label credits = new Label("Pac-Man by LarsingDash");
     private final Label victoryLabel = new Label("VICTORY");
@@ -40,7 +40,7 @@ public class PacMan extends Application {
     private boolean isVictoryVisible = false;
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         Canvas canvas = new Canvas(630, 660);
         canvas.setScaleY(-1);
         graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
@@ -94,7 +94,11 @@ public class PacMan extends Application {
     }
 
     private void update(int i) {
-        if (i % 3 == 0) player.update();
+        if (i % 3 == 0) {
+            player.update();
+            world.cycleBoosts();
+        }
+
         if (hasWon && i % 20 == 0) {
             isVictoryVisible = !isVictoryVisible;
             updateInfoBox();
@@ -153,9 +157,13 @@ public class PacMan extends Application {
         hasWon = true;
 
         level++;
-        levelLabel.setText("Level: " + level);
+        levelLabel.setText("Level: " + level + "\t/\t10");
 
         world.reset();
         player.reset();
+    }
+
+    public int getLevel() {
+        return level;
     }
 }

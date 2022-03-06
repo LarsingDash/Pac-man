@@ -8,15 +8,21 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class World {
-    private PacMan controller;
+    private final PacMan controller;
 
     private HashMap<Point, TileState> tiles = new HashMap<>();
-    private HashMap<Point, TileState> startingTiles;
+    private final HashMap<Point, TileState> startingTiles;
     private BufferedImage world;
     private BufferedImage coin;
+    private BufferedImage powerUp;
+    private final ArrayList<BufferedImage> powerUps = new ArrayList<>(5);
+
+    private int boostI = 0;
 
     private int score = 0;
     public int maxScore = 0;
@@ -26,6 +32,12 @@ public class World {
 
         try {
             world = ImageIO.read(new File("src/Images/world.png"));
+
+            for (int i = 0; i < 5; i++) {
+                powerUps.add(ImageIO.read(new File("src/Images/PowerUps/powerUp" + i + ".png")));
+            }
+
+            powerUp = powerUps.get(0);
             coin = ImageIO.read(new File("src/Images/coin.png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -85,16 +97,21 @@ public class World {
             }
         }
 
+        placePowerUps();
+
         startingTiles = new HashMap<>(tiles);
         updateScore();
     }
 
     public void draw(FXGraphics2D graphics) {
-        graphics.drawImage(world, 0,0, 630, 660, null);
+        graphics.drawImage(world, 0, 0, 630, 660, null);
 
         for (Point point : tiles.keySet()) {
-            if (tiles.get(point) == TileState.COIN) {
+            TileState state = tiles.get(point);
+            if (state == TileState.COIN) {
                 graphics.drawImage(coin, point.x * 30, point.y * 30, null);
+            } else if (state == TileState.BOOST) {
+                graphics.drawImage(powerUp, point.x * 30, point.y * 30, null);
             }
         }
     }
@@ -108,7 +125,7 @@ public class World {
         score++;
         updateScore();
 
-        if (score == 5) {
+        if (score == 3) {
             controller.victory();
         }
     }
@@ -120,6 +137,57 @@ public class World {
     public void reset() {
         score = 0;
         tiles = new HashMap<>(startingTiles);
+        placePowerUps();
         updateScore();
+    }
+
+    public void cycleBoosts() {
+        boostI = (boostI + 1) % 20;
+
+        if (boostI < 7) {
+            powerUp = powerUps.get(0);
+        } else if (boostI == 8 || boostI == 19) {
+            powerUp = powerUps.get(1);
+        } else if (boostI == 9 || boostI == 18) {
+            powerUp = powerUps.get(2);
+        } else if (boostI == 10 || boostI == 17) {
+            powerUp = powerUps.get(3);
+        } else {
+            powerUp = powerUps.get(4);
+        }
+    }
+
+    private void placePowerUps() {
+        int amountOfPowerUps;
+
+        switch (controller.getLevel()) {
+            case 1:
+            case 2:
+                amountOfPowerUps = 4;
+                break;
+            case 3:
+            case 4:
+                amountOfPowerUps = 3;
+                break;
+            case 5:
+            case 6:
+                amountOfPowerUps = 2;
+                break;
+            case 7:
+            case 8:
+                amountOfPowerUps = 1;
+                break;
+            default:
+                amountOfPowerUps = 0;
+                break;
+        }
+
+        Random random = new Random();
+        ArrayList<Point> points = new ArrayList<>(tiles.keySet());
+        for (int i = 0; i < amountOfPowerUps; i++) {
+            int attemptedI = random.nextInt(points.size());
+            if (tiles.get(points.get(attemptedI)) == TileState.COIN) tiles.replace(points.get(attemptedI), TileState.BOOST);
+            else i--;
+        }
     }
 }
