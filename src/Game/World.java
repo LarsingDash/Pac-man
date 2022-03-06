@@ -13,20 +13,26 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class World {
+    //Parent
     private final PacMan controller;
 
+    //World
     private HashMap<Point, TileState> tiles = new HashMap<>();
     private final HashMap<Point, TileState> startingTiles;
+
+    //Images
     private BufferedImage world;
     private BufferedImage coin;
     private BufferedImage powerUp;
     private final ArrayList<BufferedImage> powerUps = new ArrayList<>(5);
 
+    //Other
     private int boostI = 0;
 
     private int score = 0;
     public int maxScore = 0;
 
+    //Main Methods
     public World(PacMan controller) {
         this.controller = controller;
 
@@ -54,38 +60,27 @@ public class World {
                 //World
                 if (y == 1) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if ((x == 1 || x == 9 || x == 11 || x == 19) &&
-                        y == 2 || y == 17) {
+                } else if ((x == 1 || x == 9 || x == 11 || x == 19) && y == 2 || y == 17) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if (!(x == 6 || x == 10 || x == 14) &&
-                        (y == 3 || y == 15)) {
+                } else if (!(x == 6 || x == 10 || x == 14) && (y == 3 || y == 15)) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if ((x == 3 || x == 5 || x == 7 || x == 13 || x == 15 || x == 17) &&
-                        y == 4) {
+                } else if ((x == 3 || x == 5 || x == 7 || x == 13 || x == 15 || x == 17) && y == 4) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if (!(x == 4 || x == 16) &&
-                        y == 5) {
+                } else if (!(x == 4 || x == 16) && y == 5) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if ((x == 1 || x == 5 || x == 9 || x == 11 || x == 15 || x == 19) &&
-                        (y == 6 || y == 18 || y == 19)) {
+                } else if ((x == 1 || x == 5 || x == 9 || x == 11 || x == 15 || x == 19) && (y == 6 || y == 18 || y == 19)) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if (!(x == 10) &&
-                        (y == 7 || y == 20)) {
+                } else if (!(x == 10) && (y == 7 || y == 20)) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if ((x == 5 || x == 7 || x == 13 || x == 15) &&
-                        (y == 8 || y == 10 || y == 12)) {
+                } else if ((x == 5 || x == 7 || x == 13 || x == 15) && (y == 8 || y == 10 || y == 12)) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if ((x == 5 || (x >= 7 && x <= 13) || x == 15) &&
-                        (y == 9 || y == 13)) {
+                } else if ((x == 5 || (x >= 7 && x <= 13) || x == 15) && (y == 9 || y == 13)) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if (!(x >= 8 && x <= 12) &&
-                        y == 11) {
+                } else if (!(x >= 8 && x <= 12) && y == 11) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if ((x == 5 || x == 9 || x == 11 || x == 15) &&
-                        y == 14) {
+                } else if ((x == 5 || x == 9 || x == 11 || x == 15) && y == 14) {
                     tiles.put(new Point(x, y), TileState.COIN);
-                } else if ((x == 1 || x == 5 || x == 7 || x == 13 || x == 15 || x == 19) &&
-                        y == 16) {
+                } else if ((x == 1 || x == 5 || x == 7 || x == 13 || x == 15 || x == 19) && y == 16) {
                     tiles.put(new Point(x, y), TileState.COIN);
                 }
             }
@@ -97,9 +92,9 @@ public class World {
             }
         }
 
-        placePowerUps();
-
         startingTiles = new HashMap<>(tiles);
+
+        placePowerUps();
         updateScore();
     }
 
@@ -110,23 +105,26 @@ public class World {
             TileState state = tiles.get(point);
             if (state == TileState.COIN) {
                 graphics.drawImage(coin, point.x * 30, point.y * 30, null);
-            } else if (state == TileState.BOOST) {
+            } else if (state == TileState.POWER_UP) {
                 graphics.drawImage(powerUp, point.x * 30, point.y * 30, null);
             }
         }
     }
 
-    public HashMap<Point, TileState> getTiles() {
-        return tiles;
-    }
+    //Other
+    public void collect(Point tile) {
+        if (tiles.get(tile) != TileState.EMPTY) {
+            if (tiles.get(tile) == TileState.POWER_UP) {
+                controller.powerUp();
+            }
 
-    public void collectCoin(Point tile) {
-        tiles.put(tile, TileState.EMPTY);
-        score++;
-        updateScore();
+            tiles.put(tile, TileState.EMPTY);
+            score++;
+            updateScore();
 
-        if (score == 3) {
-            controller.victory();
+            if (score == 3) {
+                controller.victory();
+            }
         }
     }
 
@@ -186,8 +184,13 @@ public class World {
         ArrayList<Point> points = new ArrayList<>(tiles.keySet());
         for (int i = 0; i < amountOfPowerUps; i++) {
             int attemptedI = random.nextInt(points.size());
-            if (tiles.get(points.get(attemptedI)) == TileState.COIN) tiles.replace(points.get(attemptedI), TileState.BOOST);
+            if (tiles.get(points.get(attemptedI)) == TileState.COIN) tiles.replace(points.get(attemptedI), TileState.POWER_UP);
             else i--;
         }
+    }
+
+    //Getters Setters
+    public HashMap<Point, TileState> getTiles() {
+        return tiles;
     }
 }

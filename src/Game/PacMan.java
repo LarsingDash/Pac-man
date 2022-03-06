@@ -22,23 +22,32 @@ public class PacMan extends Application {
         PacMan.launch();
     }
 
+    //Game
     public FXGraphics2D graphics;
 
+    //Info
     private final Label scoreCounter = new Label("");
     private int level = 1;
-    private final World world = new World(this);
     private final Label levelLabel = new Label("Level: " + level + "\t/\t10");
-
     private final Label credits = new Label("Pac-Man by LarsingDash");
     private final Label victoryLabel = new Label("VICTORY");
     private final HBox info = new HBox(scoreCounter, credits, levelLabel);
 
+    //Game elements
+    private final World world = new World(this);
+
     private final Player player = new Player(world);
     private SimpleDirection playerDirection = SimpleDirection.NONE;
 
+    //Victory
     private boolean hasWon = false;
     private boolean isVictoryVisible = false;
 
+    //PowerUp
+    private boolean isPoweredUp = false;
+    private int powerUpCounter = 0;
+
+    //Game
     @Override
     public void start(Stage primaryStage) {
         Canvas canvas = new Canvas(630, 660);
@@ -61,7 +70,7 @@ public class PacMan extends Application {
 
         VBox layout = new VBox(info, canvas);
         Scene scene = new Scene(layout);
-        scene.setOnKeyPressed(this::key);
+        scene.setOnKeyPressed(this::keyInput);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
@@ -109,7 +118,8 @@ public class PacMan extends Application {
         player.draw(graphics);
     }
 
-    private void key(KeyEvent event) {
+    //Input
+    private void keyInput(KeyEvent event) {
         boolean isValidInput = false;
         switch (event.getCode()) {
             case W:
@@ -141,16 +151,17 @@ public class PacMan extends Application {
         }
     }
 
-    public void updateScore(String text) {
-        scoreCounter.setText("Score: " + text);
-    }
-
+    //Info
     private void updateInfoBox() {
         if (isVictoryVisible) {
             info.getChildren().set(1, victoryLabel);
         } else {
             info.getChildren().set(1, credits);
         }
+    }
+
+    public void updateScore(String text) {
+        scoreCounter.setText("Score: " + text);
     }
 
     public void victory() {
@@ -163,6 +174,12 @@ public class PacMan extends Application {
         player.reset();
     }
 
+    //Other
+    public void powerUp() {
+        System.out.println("yeah bwoiii");
+    }
+
+    //Getters Setters
     public int getLevel() {
         return level;
     }

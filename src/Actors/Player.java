@@ -1,7 +1,6 @@
 package Actors;
 
 import Enums.SimpleDirection;
-import Enums.TileState;
 import Game.World;
 import org.jfree.fx.FXGraphics2D;
 
@@ -31,6 +30,7 @@ public class Player {
     private boolean isOpen = true;
     private int counter = 0;
 
+    //Main Methods
     public Player(World world) {
         Ellipse2D.Double eye = new Ellipse2D.Double(10, 17.5, 7.5, 7.5);
         open.add(new Area(new Arc2D.Double(0, 0, 30, 30, 45, 270, Arc2D.PIE)));
@@ -57,23 +57,60 @@ public class Player {
             Point currentTile = new Point(position.x / 10, position.y / 10);
 
             if (world.getTiles().containsKey(currentTile)) {
-                if (world.getTiles().get(currentTile) == TileState.COIN) {
-                    world.collectCoin(currentTile);
-                }
+                world.collect(currentTile);
             }
 
             if (currentTile.equals(leftTeleporter)) {
                 position = new Point(rightTeleporter.x * 10, rightTeleporter.y * 10);
                 currentDirection = SimpleDirection.LEFT;
-                world.collectCoin(rightTeleporter);
+                world.collect(rightTeleporter);
             } else if (currentTile.equals(rightTeleporter)) {
                 position = new Point(leftTeleporter.x * 10, leftTeleporter.y * 10);
                 currentDirection = SimpleDirection.RIGHT;
-                world.collectCoin(leftTeleporter);
+                world.collect(leftTeleporter);
             }
         }
     }
 
+    public void draw(FXGraphics2D graphics) {
+        counter++;
+        if (counter == 10) {
+            counter = 0;
+            isOpen = !isOpen;
+        }
+
+        SimpleDirection direction = currentDirection;
+        AffineTransform transform = new AffineTransform();
+
+        switch (direction) {
+            case UP:
+            case LEFT:
+                transform.translate(getPosition().x * 3 + 30, getPosition().y * 3);
+                break;
+            case DOWN:
+                transform.translate(getPosition().x * 3 + 30, getPosition().y * 3 + 30);
+                break;
+            default:
+                transform.translate(getPosition().x * 3, getPosition().y * 3);
+                break;
+        }
+        transform.quadrantRotate(direction.degrees);
+
+        if (direction == SimpleDirection.LEFT || direction == SimpleDirection.DOWN) {
+            transform.scale(1, -1);
+        }
+
+        graphics.setTransform(transform);
+
+        graphics.setColor(Color.YELLOW);
+        if (isOpen) {
+            graphics.fill(open);
+        } else {
+            graphics.fill(closed);
+        }
+    }
+
+    //Move
     public boolean move(SimpleDirection direction) {
         Point attemptingPosition;
 
@@ -142,44 +179,14 @@ public class Player {
         return world.getTiles().containsKey(checkingTile);
     }
 
-    public void draw(FXGraphics2D graphics) {
-        counter++;
-        if (counter == 10) {
-            counter = 0;
-            isOpen = !isOpen;
-        }
-
-        SimpleDirection direction = currentDirection;
-        AffineTransform transform = new AffineTransform();
-
-        switch (direction) {
-            case UP:
-            case LEFT:
-                transform.translate(getPosition().x * 3 + 30, getPosition().y * 3);
-                break;
-            case DOWN:
-                transform.translate(getPosition().x * 3 + 30, getPosition().y * 3 + 30);
-                break;
-            default:
-                transform.translate(getPosition().x * 3, getPosition().y * 3);
-                break;
-        }
-        transform.quadrantRotate(direction.degrees);
-
-        if (direction == SimpleDirection.LEFT || direction == SimpleDirection.DOWN) {
-            transform.scale(1, -1);
-        }
-
-        graphics.setTransform(transform);
-
-        graphics.setColor(Color.YELLOW);
-        if (isOpen) {
-            graphics.fill(open);
-        } else {
-            graphics.fill(closed);
-        }
+    //Other
+    public void reset() {
+        position = new Point(100, 90);
+        bufferedDirection = SimpleDirection.NONE;
+        currentDirection = SimpleDirection.NONE;
     }
 
+    //Getters and Setters
     public Point getPosition() {
         return position;
     }
@@ -188,11 +195,5 @@ public class Player {
         if (newBufferedDirection != currentDirection) {
             bufferedDirection = newBufferedDirection;
         }
-    }
-
-    public void reset() {
-        position = new Point(100, 90);
-        bufferedDirection = SimpleDirection.NONE;
-        currentDirection = SimpleDirection.NONE;
     }
 }
