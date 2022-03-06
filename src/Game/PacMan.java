@@ -112,6 +112,16 @@ public class PacMan extends Application {
             isVictoryVisible = !isVictoryVisible;
             updateInfoBox();
         }
+
+        if (isPoweredUp) {
+            powerUpCounter++;
+
+            if (powerUpCounter == 600) {
+                isPoweredUp = false;
+
+                player.powerUp(false);
+            }
+        }
     }
 
     private void drawObjects() {
@@ -176,7 +186,10 @@ public class PacMan extends Application {
 
     //Other
     public void powerUp() {
-        System.out.println("yeah bwoiii");
+        isPoweredUp = true;
+        powerUpCounter = 0;
+
+        player.powerUp(true);
     }
 
     //Getters Setters

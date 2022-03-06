@@ -19,6 +19,7 @@ public class Player {
 
     //Moving
     private Point position = new Point(100, 90);
+    private int speed = 1;
 
     //Directions
     private SimpleDirection currentDirection = SimpleDirection.NONE;
@@ -116,16 +117,16 @@ public class Player {
 
         switch (direction) {
             case UP:
-                attemptingPosition = new Point(position.x, position.y + 1);
+                attemptingPosition = new Point(position.x, position.y + speed);
                 break;
             case DOWN:
-                attemptingPosition = new Point(position.x, position.y - 1);
+                attemptingPosition = new Point(position.x, position.y - speed);
                 break;
             case LEFT:
-                attemptingPosition = new Point(position.x - 1, position.y);
+                attemptingPosition = new Point(position.x - speed, position.y);
                 break;
             case RIGHT:
-                attemptingPosition = new Point(position.x + 1, position.y);
+                attemptingPosition = new Point(position.x + speed, position.y);
                 break;
             default:
                 attemptingPosition = new Point(position.x, position.y);
@@ -184,6 +185,15 @@ public class Player {
         position = new Point(100, 90);
         bufferedDirection = SimpleDirection.NONE;
         currentDirection = SimpleDirection.NONE;
+        speed = 1;
+    }
+
+    public void powerUp(boolean powerUp) {
+        if (powerUp) {
+            speed = 2;
+        } else {
+            speed = 1;
+        }
     }
 
     //Getters and Setters

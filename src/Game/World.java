@@ -122,7 +122,7 @@ public class World {
             score++;
             updateScore();
 
-            if (score == 3) {
+            if (score == maxScore) {
                 controller.victory();
             }
         }
