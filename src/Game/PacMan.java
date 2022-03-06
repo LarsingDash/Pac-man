@@ -20,11 +20,11 @@ public class PacMan extends Application {
     }
 
     private Stage stage;
-    private FXGraphics2D graphics;
+    public FXGraphics2D graphics;
 
     private World world = new World();
 
-    private Player player = new Player(this, new Point(315, 285));
+    private Player player = new Player(this, world);
     private SimpleDirection playerDirection = SimpleDirection.NONE;
 
     @Override
@@ -70,7 +70,7 @@ public class PacMan extends Application {
     }
 
     private void update(int i) {
-        if (i % 3 == 0) player.move(playerDirection);
+        if (i % 3 == 0) player.update();
     }
 
     private void drawObjects() {
@@ -78,23 +78,36 @@ public class PacMan extends Application {
     }
 
     private void key(KeyEvent event) {
+        boolean isValidInput = false;
         switch (event.getCode()) {
             case W:
                 playerDirection = SimpleDirection.UP;
+                isValidInput = true;
                 break;
             case S:
                 playerDirection = SimpleDirection.DOWN;
+                isValidInput = true;
                 break;
             case A:
                 playerDirection = SimpleDirection.LEFT;
+                isValidInput = true;
                 break;
             case D:
                 playerDirection = SimpleDirection.RIGHT;
+                isValidInput = true;
                 break;
+        }
+
+        if (isValidInput) {
+            player.setBufferedDirection(playerDirection);
         }
     }
 
     public SimpleDirection getPlayerDirection() {
         return playerDirection;
+    }
+
+    public void setPlayerDirection(SimpleDirection playerDirection) {
+        this.playerDirection = playerDirection;
     }
 }

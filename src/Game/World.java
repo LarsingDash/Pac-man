@@ -26,7 +26,10 @@ public class World {
         for (int x = 0; x < 21; x++) {
             for (int y = 0; y < 22; y++) {
                 if (x == 0 || x == 20 || y == 0 || y == 21) continue;       //Border
-                if (x == 10 && y == 9) continue;                            //Player
+                if (x == 10 && y == 9) {                                    //Player
+                    tiles.put(new Point(x, y), TileState.EMPTY);
+                    continue;
+                }
 
                 //World
                 if (y == 1) {
@@ -77,5 +80,9 @@ public class World {
                 graphics.drawImage(coin, point.x * 30, point.y * 30, null);
             }
         }
+    }
+
+    public HashMap<Point, TileState> getTiles() {
+        return tiles;
     }
 }

@@ -12,4 +12,19 @@ public enum SimpleDirection {
     SimpleDirection(int degrees) {
         this.degrees = degrees;
     }
+
+    public boolean isOpposite(SimpleDirection other) {
+        switch (this) {
+            default:
+                return false;
+            case UP:
+                return other == DOWN;
+            case DOWN:
+                return other == UP;
+            case LEFT:
+                return other == RIGHT;
+            case RIGHT:
+                return other == LEFT;
+        }
+    }
 }
