@@ -14,6 +14,9 @@ public class Player {
     private final PacMan controller;
     private World world;
 
+    private static final Point leftTeleporter =new Point(1, 11);
+    private static final Point rightTeleporter =new Point(19, 11);
+
     //Moving
     private Point position;
 
@@ -26,7 +29,6 @@ public class Player {
     private final Area closed = new Area();
     private boolean isOpen = true;
     private int counter = 0;
-    private Point currentTile;
 
     public Player(PacMan controller, World world) {
         Ellipse2D.Double eye = new Ellipse2D.Double(10, 17.5, 7.5, 7.5);
@@ -59,6 +61,16 @@ public class Player {
                 if (world.getTiles().get(currentTile) == TileState.COIN) {
                     world.collectCoin(currentTile);
                 }
+            }
+
+            if (currentTile.equals(leftTeleporter)) {
+                position = new Point(rightTeleporter.x * 10, rightTeleporter.y * 10);
+                currentDirection = SimpleDirection.LEFT;
+                world.collectCoin(rightTeleporter);
+            } else if (currentTile.equals(rightTeleporter)) {
+                position = new Point(leftTeleporter.x * 10, leftTeleporter.y * 10);
+                currentDirection = SimpleDirection.RIGHT;
+                world.collectCoin(leftTeleporter);
             }
         }
     }
@@ -102,6 +114,7 @@ public class Player {
 
     private boolean checkTile(SimpleDirection direction) {
         //Make current point
+        Point currentTile;
         if (direction == SimpleDirection.LEFT) {
             currentTile = new Point((position.x - 1) / 10, (position.y) / 10);
         } else if (direction == SimpleDirection.DOWN) {
@@ -170,10 +183,6 @@ public class Player {
 
     public Point getPosition() {
         return position;
-    }
-
-    public PacMan getController() {
-        return controller;
     }
 
     public void setBufferedDirection(SimpleDirection newBufferedDirection) {
