@@ -11,11 +11,18 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class World {
+    private PacMan controller;
+
     private HashMap<Point, TileState> tiles = new HashMap<>();
     private BufferedImage world;
     private BufferedImage coin;
 
-    public World() {
+    private int score = 0;
+    private int maxScore = 0;
+
+    public World(PacMan controller) {
+        this.controller = controller;
+
         try {
             world = ImageIO.read(new File("src/Images/world.png"));
             coin = ImageIO.read(new File("src/Images/coin.png"));
@@ -70,6 +77,14 @@ public class World {
                 }
             }
         }
+
+        for (Point point : tiles.keySet()) {
+            if (tiles.get(point) == TileState.COIN) {
+                maxScore++;
+            }
+        }
+
+        updateScore();
     }
 
     public void draw(FXGraphics2D graphics) {
@@ -84,5 +99,15 @@ public class World {
 
     public HashMap<Point, TileState> getTiles() {
         return tiles;
+    }
+
+    public void collectCoin(Point tile) {
+        tiles.put(tile, TileState.EMPTY);
+        score++;
+        updateScore();
+    }
+
+    private void updateScore() {
+        controller.updateScore(score + " / " + maxScore);
     }
 }

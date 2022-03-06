@@ -6,8 +6,10 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jfree.fx.FXGraphics2D;
 
@@ -22,7 +24,8 @@ public class PacMan extends Application {
     private Stage stage;
     public FXGraphics2D graphics;
 
-    private World world = new World();
+    private Label scoreCounter = new Label("");
+    private World world = new World(this);
 
     private Player player = new Player(this, world);
     private SimpleDirection playerDirection = SimpleDirection.NONE;
@@ -34,9 +37,12 @@ public class PacMan extends Application {
         Canvas canvas = new Canvas(630, 660);
         canvas.setScaleY(-1);
         graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
-
         graphics.setBackground(Color.BLACK);
-        Scene scene = new Scene(new HBox(canvas));
+
+        HBox info = new HBox(scoreCounter);
+
+        VBox layout = new VBox(info, canvas);
+        Scene scene = new Scene(layout);
         scene.setOnKeyPressed(this::key);
         stage.setScene(scene);
         stage.setResizable(false);
@@ -109,5 +115,9 @@ public class PacMan extends Application {
 
     public void setPlayerDirection(SimpleDirection playerDirection) {
         this.playerDirection = playerDirection;
+    }
+
+    public void updateScore(String text) {
+        scoreCounter.setText(text);
     }
 }

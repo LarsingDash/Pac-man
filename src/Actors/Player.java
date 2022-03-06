@@ -1,6 +1,7 @@
 package Actors;
 
 import Enums.SimpleDirection;
+import Enums.TileState;
 import Game.PacMan;
 import Game.World;
 import org.jfree.fx.FXGraphics2D;
@@ -25,6 +26,7 @@ public class Player {
     private final Area closed = new Area();
     private boolean isOpen = true;
     private int counter = 0;
+    private Point currentTile;
 
     public Player(PacMan controller, World world) {
         Ellipse2D.Double eye = new Ellipse2D.Double(10, 17.5, 7.5, 7.5);
@@ -48,6 +50,16 @@ public class Player {
             }
         } else {
             move(currentDirection);
+        }
+
+        if (position.x % 10 == 0 && position.y % 10 == 0) {
+            Point currentTile = new Point(position.x / 10, position.y / 10);
+
+            if (world.getTiles().containsKey(currentTile)) {
+                if (world.getTiles().get(currentTile) == TileState.COIN) {
+                    world.collectCoin(currentTile);
+                }
+            }
         }
     }
 
@@ -90,7 +102,6 @@ public class Player {
 
     private boolean checkTile(SimpleDirection direction) {
         //Make current point
-        Point currentTile;
         if (direction == SimpleDirection.LEFT) {
             currentTile = new Point((position.x - 1) / 10, (position.y) / 10);
         } else if (direction == SimpleDirection.DOWN) {
@@ -114,15 +125,6 @@ public class Player {
                 checkingTile = new Point(currentTile.x + 1, currentTile.y);
                 break;
         }
-
-        //Debug
-        if (direction == bufferedDirection) {
-            controller.graphics.setColor(Color.GREEN);
-        } else {
-            controller.graphics.setColor(Color.RED);
-        }
-
-        controller.graphics.fillRect(checkingTile.x * 30, checkingTile.y * 30, 30, 30);
 
         //Checking
         return world.getTiles().containsKey(checkingTile);
