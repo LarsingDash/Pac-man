@@ -1,5 +1,6 @@
 package Game;
 
+import Actors.Ghost;
 import Actors.Player;
 import Enums.SimpleDirection;
 import javafx.animation.AnimationTimer;
@@ -16,6 +17,7 @@ import org.jfree.fx.FXGraphics2D;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 
 public class PacMan extends Application {
     public static void main(String[] args) {
@@ -38,6 +40,8 @@ public class PacMan extends Application {
 
     private final Player player = new Player(world);
     private SimpleDirection playerDirection = SimpleDirection.NONE;
+
+    private ArrayList<Ghost> ghosts = new ArrayList<>();
 
     //Victory
     private boolean hasWon = false;
@@ -93,6 +97,11 @@ public class PacMan extends Application {
                 }
             }
         }.start();
+
+        ghosts.add(new Ghost(this, "red"));
+        ghosts.add(new Ghost(this, "pink"));
+        ghosts.add(new Ghost(this, "cyan"));
+        ghosts.add(new Ghost(this, "orange"));
     }
 
     private void drawWorld() {
@@ -125,6 +134,10 @@ public class PacMan extends Application {
     }
 
     private void drawObjects() {
+        for (Ghost ghost : ghosts) {
+            ghost.draw(graphics);
+        }
+
         player.draw(graphics);
     }
 
