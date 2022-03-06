@@ -26,19 +26,20 @@ public class PacMan extends Application {
 
     //Game
     public FXGraphics2D graphics;
+    public boolean isRunning = true;
 
     //Info
-    private final Label scoreCounter = new Label("");
     private int level = 1;
     private final Label levelLabel = new Label("Level: " + level + "\t/\t10");
+    private final Label scoreCounter = new Label("");
     private final Label credits = new Label("Pac-Man by LarsingDash");
     private final Label victoryLabel = new Label("VICTORY");
-    private final HBox info = new HBox(scoreCounter, credits, levelLabel);
+    private final HBox info = new HBox(levelLabel, credits, scoreCounter);
 
     //Game elements
     private final World world = new World(this);
 
-    private final Player player = new Player(world);
+    private final Player player = new Player(this, world);
     private SimpleDirection playerDirection = SimpleDirection.NONE;
 
     private ArrayList<Ghost> ghosts = new ArrayList<>();
@@ -51,6 +52,9 @@ public class PacMan extends Application {
     private boolean isPoweredUp = false;
     private int powerUpCounter = 0;
 
+    //Other
+    private boolean gateOpen = false;
+
     //Game
     @Override
     public void start(Stage primaryStage) {
@@ -62,14 +66,14 @@ public class PacMan extends Application {
         updateInfoBox();
         info.setMinHeight(21);
 
-        scoreCounter.setMinWidth(210);
-        credits.setMinWidth(210);
         levelLabel.setMinWidth(210);
+        credits.setMinWidth(210);
+        scoreCounter.setMinWidth(210);
         victoryLabel.setMinWidth(210);
 
-        scoreCounter.setAlignment(Pos.CENTER);
-        credits.setAlignment(Pos.CENTER);
         levelLabel.setAlignment(Pos.CENTER);
+        credits.setAlignment(Pos.CENTER);
+        scoreCounter.setAlignment(Pos.CENTER);
         victoryLabel.setAlignment(Pos.CENTER);
 
         VBox layout = new VBox(info, canvas);
@@ -106,29 +110,53 @@ public class PacMan extends Application {
 
     private void drawWorld() {
         graphics.setTransform(new AffineTransform());
-        graphics.clearRect(0,0,630,660);
+        graphics.clearRect(0, 0, 630, 660);
 
         world.draw(graphics);
     }
 
     private void update(int i) {
-        if (i % 3 == 0) {
-            player.update();
-            world.cycleBoosts();
-        }
+        if (isRunning) {
+            if (i % 3 == 0) {
+                player.update();
 
-        if (hasWon && i % 20 == 0) {
-            isVictoryVisible = !isVictoryVisible;
-            updateInfoBox();
-        }
+                for (Ghost ghost : ghosts) {
+                    ghost.update();
+                }
 
-        if (isPoweredUp) {
-            powerUpCounter++;
+                world.cycleBoosts();
+            }
 
-            if (powerUpCounter == 600) {
-                isPoweredUp = false;
+            if (gateOpen) {
+                boolean allOut = true;
 
-                player.powerUp(false);
+                for (Ghost ghost : ghosts) {
+                    Point position = ghost.getPosition();
+                    if ((position.x > 80 && position.x < 120) && (position.y >= 110 && position.y <= 120)) {
+                        allOut = false;
+                        break;
+                    }
+                }
+
+                if (allOut) {
+                    world.closeGate();
+                    gateOpen = false;
+                }
+            }
+
+            if (hasWon && i % 20 == 0) {
+                isVictoryVisible = !isVictoryVisible;
+                updateInfoBox();
+            }
+
+            if (isPoweredUp) {
+                powerUpCounter++;
+
+                if (powerUpCounter == 600) {
+                    isPoweredUp = false;
+
+                    player.powerUp(false);
+                }
             }
         }
     }
@@ -193,11 +221,37 @@ public class PacMan extends Application {
         level++;
         levelLabel.setText("Level: " + level + "\t/\t10");
 
-        world.reset();
-        player.reset();
+        reset();
     }
 
     //Other
+    public void collision() {
+        if (isPoweredUp) {
+            System.out.println("dede");
+        } else {
+            if (isRunning) {
+                isRunning = false;
+                DeathScreen deathScreen = new DeathScreen(this, world.getScore(), level);
+                deathScreen.start();
+            }
+        }
+    }
+
+    public void reset() {
+        world.reset();
+        player.reset();
+
+        for (Ghost ghost : ghosts) {
+            ghost.reset();
+        }
+
+        level = 0;
+        isPoweredUp = false;
+        gateOpen = false;
+
+        isRunning = true;
+    }
+
     public void powerUp() {
         isPoweredUp = true;
         powerUpCounter = 0;
@@ -205,8 +259,51 @@ public class PacMan extends Application {
         player.powerUp(true);
     }
 
+    public boolean checkTile(SimpleDirection direction, Point position) {
+        //Make current point
+        Point currentTile;
+        if (direction == SimpleDirection.LEFT) {
+            currentTile = new Point((position.x - 1) / 10, (position.y) / 10);
+        } else if (direction == SimpleDirection.DOWN) {
+            currentTile = new Point((position.x) / 10, (position.y - 1) / 10);
+        } else {
+            currentTile = new Point((position.x) / 10, (position.y) / 10);
+        }
+
+        //Make point to check
+        Point checkingTile;
+        switch (direction) {
+            case NONE:
+            case DOWN:
+            case LEFT:
+                checkingTile = new Point(currentTile.x, currentTile.y);
+                break;
+            case UP:
+                checkingTile = new Point(currentTile.x, currentTile.y + 1);
+                break;
+            default:
+                checkingTile = new Point(currentTile.x + 1, currentTile.y);
+                break;
+        }
+
+        //Checking
+        return world.getTiles().containsKey(checkingTile);
+    }
+
+    public void openGate() {
+        gateOpen = true;
+    }
+
     //Getters Setters
     public int getLevel() {
         return level;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public ArrayList<Ghost> getGhosts() {
+        return ghosts;
     }
 }

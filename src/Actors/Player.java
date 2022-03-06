@@ -1,6 +1,7 @@
 package Actors;
 
 import Enums.SimpleDirection;
+import Game.PacMan;
 import Game.World;
 import org.jfree.fx.FXGraphics2D;
 
@@ -12,6 +13,7 @@ import java.awt.geom.Ellipse2D;
 
 public class Player {
     //Game
+    private final PacMan controller;
     private final World world;
 
     private static final Point leftTeleporter =new Point(1, 11);
@@ -32,14 +34,15 @@ public class Player {
     private int counter = 0;
 
     //Main Methods
-    public Player(World world) {
+    public Player(PacMan controller, World world) {
+        this.controller = controller;
+        this.world = world;
+
         Ellipse2D.Double eye = new Ellipse2D.Double(10, 17.5, 7.5, 7.5);
         open.add(new Area(new Arc2D.Double(0, 0, 30, 30, 45, 270, Arc2D.PIE)));
         open.subtract(new Area(eye));
         closed.add(new Area(new Arc2D.Double(0, 0, 30, 30, 20, 320, Arc2D.PIE)));
         closed.subtract(new Area(eye));
-
-        this.world = world;
     }
 
     public void update() {
@@ -133,7 +136,7 @@ public class Player {
                 break;
         }
 
-        if (checkTile(direction)) {
+        if (controller.checkTile(direction, position)) {
             if (direction == bufferedDirection) {
                 if ((position.x % 10 == 0 && position.y % 10 == 0) || bufferedDirection.isOpposite(currentDirection)) {
                     position = attemptingPosition;
@@ -147,37 +150,6 @@ public class Player {
         } else {
             return false;
         }
-    }
-
-    private boolean checkTile(SimpleDirection direction) {
-        //Make current point
-        Point currentTile;
-        if (direction == SimpleDirection.LEFT) {
-            currentTile = new Point((position.x - 1) / 10, (position.y) / 10);
-        } else if (direction == SimpleDirection.DOWN) {
-            currentTile = new Point((position.x) / 10, (position.y - 1) / 10);
-        } else {
-            currentTile = new Point((position.x) / 10, (position.y) / 10);
-        }
-
-        //Make point to check
-        Point checkingTile;
-        switch (direction) {
-            case NONE:
-            case DOWN:
-            case LEFT:
-                checkingTile = new Point(currentTile.x, currentTile.y);
-                break;
-            case UP:
-                checkingTile = new Point(currentTile.x, currentTile.y + 1);
-                break;
-            default:
-                checkingTile = new Point(currentTile.x + 1, currentTile.y);
-                break;
-        }
-
-        //Checking
-        return world.getTiles().containsKey(checkingTile);
     }
 
     //Other

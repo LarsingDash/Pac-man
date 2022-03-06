@@ -22,6 +22,8 @@ public class World {
 
     //Images
     private BufferedImage world;
+    private BufferedImage worldClosed;
+    private BufferedImage worldOpen;
     private BufferedImage coin;
     private BufferedImage powerUp;
     private final ArrayList<BufferedImage> powerUps = new ArrayList<>(5);
@@ -37,7 +39,10 @@ public class World {
         this.controller = controller;
 
         try {
-            world = ImageIO.read(new File("src/Images/world.png"));
+            worldClosed = ImageIO.read(new File("src/Images/worldClosed.png"));
+            worldOpen = ImageIO.read(new File("src/Images/worldOpen.png"));
+
+            world = worldClosed;
 
             for (int i = 0; i < 5; i++) {
                 powerUps.add(ImageIO.read(new File("src/Images/PowerUps/powerUp" + i + ".png")));
@@ -53,6 +58,10 @@ public class World {
             for (int y = 0; y < 22; y++) {
                 if (x == 0 || x == 20 || y == 0 || y == 21) continue;       //Border
                 if (x == 10 && y == 9) {                                    //Player
+                    tiles.put(new Point(x, y), TileState.EMPTY);
+                    continue;
+                }
+                if ((x > 8 && x < 12) && y == 11) {                         //Cage
                     tiles.put(new Point(x, y), TileState.EMPTY);
                     continue;
                 }
@@ -124,6 +133,16 @@ public class World {
 
             if (score == maxScore) {
                 controller.victory();
+            } else if (score == 1) {
+                controller.getGhosts().get(0).setReleased(true);
+            } else if (score == 5) {
+                controller.getGhosts().get(1).setReleased(true);
+                tiles.put(new Point(10,12), TileState.EMPTY);
+                world = worldOpen;
+                controller.openGate();
+            } else if (score == 10) {
+                controller.getGhosts().get(2).setReleased(true);
+                controller.getGhosts().get(3).setReleased(true);
             }
         }
     }
@@ -135,6 +154,7 @@ public class World {
     public void reset() {
         score = 0;
         tiles = new HashMap<>(startingTiles);
+        world = worldClosed;
         placePowerUps();
         updateScore();
     }
@@ -184,13 +204,23 @@ public class World {
         ArrayList<Point> points = new ArrayList<>(tiles.keySet());
         for (int i = 0; i < amountOfPowerUps; i++) {
             int attemptedI = random.nextInt(points.size());
-            if (tiles.get(points.get(attemptedI)) == TileState.COIN) tiles.replace(points.get(attemptedI), TileState.POWER_UP);
+            if (tiles.get(points.get(attemptedI)) == TileState.COIN)
+                tiles.replace(points.get(attemptedI), TileState.POWER_UP);
             else i--;
         }
+    }
+
+    public void closeGate() {
+        tiles.remove(new Point(10, 12));
+        world = worldClosed;
     }
 
     //Getters Setters
     public HashMap<Point, TileState> getTiles() {
         return tiles;
+    }
+
+    public int getScore() {
+        return score;
     }
 }
