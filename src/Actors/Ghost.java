@@ -214,6 +214,7 @@ public class Ghost {
         position = startingPosition;
         direction = SimpleDirection.NONE;
         isReleased = false;
+        sprite = normalSprite;
     }
 
     public void kill() {

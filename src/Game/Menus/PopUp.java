@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 public class PopUp extends Stage {
@@ -37,11 +38,15 @@ public class PopUp extends Stage {
     }
 
     public void start() {
+        initOwner(controller.getStage());
         Label death = new Label(message);
-        Label score = new Label("Level: " + level + "\t\tyou\t" + "Score: " + this.score);
-        Label record = new Label("Level: " + recordLevel + "\t\trec\t" + "Score: " + this.recordScore);
+        Label score = new Label("Level: " + level + "\tyou\t" + "Score: " + this.score);
+        Label record = new Label("Level: " + recordLevel + "\trec\t" + "Score: " + this.recordScore);
         Button restart = new Button("restart");
         VBox content = new VBox(death, score, record, restart);
+
+        score.setTextAlignment(TextAlignment.CENTER);
+        record.setTextAlignment(TextAlignment.CENTER);
 
         death.setAlignment(Pos.CENTER);
         score.setAlignment(Pos.CENTER);

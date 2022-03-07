@@ -228,6 +228,10 @@ public class PacMan extends Application {
                 }
 
                 isRunning = !isRunning;
+                break;
+            case Z:
+                victory();
+                break;
         }
 
         if (isValidInput) {
@@ -320,6 +324,9 @@ public class PacMan extends Application {
     }
 
     public void reset(boolean full) {
+        if (full) level = 1;
+        levelLabel.setText("Level: " + level + "\t/\t10");
+
         world.reset();
         player.reset();
 
@@ -327,7 +334,6 @@ public class PacMan extends Application {
             ghost.reset();
         }
 
-        if (full) level = 1;
         isPoweredUp = false;
         gateOpen = false;
 

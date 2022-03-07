@@ -136,10 +136,11 @@ public class World {
             } else if (score == 1) {
                 controller.getGhosts().get(0).setReleased(true);
             } else if (score == 5) {
-                controller.getGhosts().get(1).setReleased(true);
                 openGate();
-            } else if (score == 10) {
+                controller.getGhosts().get(1).setReleased(true);
+            } else if (score == 7) {
                 controller.getGhosts().get(2).setReleased(true);
+            } else if (score == 10) {
                 controller.getGhosts().get(3).setReleased(true);
             }
         }
