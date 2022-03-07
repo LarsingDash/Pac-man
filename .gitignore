@@ -25,3 +25,5 @@ replay_pid*
 src/Images/
 out/
 src/Game/record.txt
+out/production/Images/
+.idea/inspectionProfiles/Project_Default.xml

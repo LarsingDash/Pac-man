@@ -175,37 +175,66 @@ public class World {
     }
 
     private void placePowerUps() {
-        int amountOfPowerUps;
-
-        switch (controller.getLevel()) {
-            case 1:
-            case 2:
-                amountOfPowerUps = 4;
-                break;
-            case 3:
-            case 4:
-                amountOfPowerUps = 3;
-                break;
-            case 5:
-            case 6:
-                amountOfPowerUps = 2;
-                break;
-            case 7:
-            case 8:
-                amountOfPowerUps = 1;
-                break;
-            default:
-                amountOfPowerUps = 0;
-                break;
-        }
+        //todo place in sections
 
         Random random = new Random();
         ArrayList<Point> points = new ArrayList<>(tiles.keySet());
-        for (int i = 0; i < amountOfPowerUps; i++) {
-            int attemptedI = random.nextInt(points.size());
-            if (tiles.get(points.get(attemptedI)) == TileState.COIN)
-                tiles.replace(points.get(attemptedI), TileState.POWER_UP);
-            else i--;
+
+        switch (controller.getLevel()) {
+            case 1:     //4
+            case 2:
+                boolean bottomLeft = false;
+                boolean bottomRight = false;
+                boolean topLeft = false;
+                boolean topRight = false;
+
+                while (!(bottomLeft && bottomRight && topLeft && topRight)) {
+                    int attemptingI = random.nextInt(points.size());
+                    Point attemptingPoint = points.get(attemptingI);
+
+                    if (!bottomLeft && attemptingPoint.y < 11 && attemptingPoint.x < 10) {
+                        bottomLeft = true;
+                        tiles.replace(points.get(attemptingI), TileState.POWER_UP);
+                    } else if (!bottomRight && attemptingPoint.y < 11 && attemptingPoint.x >= 11) {
+                        bottomRight = true;
+                        tiles.replace(points.get(attemptingI), TileState.POWER_UP);
+                    } else if (!topLeft && attemptingPoint.y >= 12 && attemptingPoint.x < 10) {
+                        topLeft = true;
+                        tiles.replace(points.get(attemptingI), TileState.POWER_UP);
+                    } else if (!topRight && attemptingPoint.y >= 12 && attemptingPoint.x >= 11) {
+                        topRight = true;
+                        tiles.replace(points.get(attemptingI), TileState.POWER_UP);
+                    }
+                }
+
+                break;
+            case 3:     //3
+            case 4:
+                tiles.replace(points.get(random.nextInt(points.size())), TileState.POWER_UP);
+            case 5:     //2
+            case 6:
+                boolean hasBottom = false;
+                boolean hasTop = false;
+
+                while (!(hasBottom && hasTop)) {
+                    int attemptingI = random.nextInt(points.size());
+                    Point attemptingPoint = points.get(attemptingI);
+
+                    if (!hasBottom && attemptingPoint.y < 11) {
+                        hasBottom = true;
+                        tiles.replace(points.get(attemptingI), TileState.POWER_UP);
+                    } else if (!hasTop && attemptingPoint.y >= 12) {
+                        hasTop = true;
+                        tiles.replace(points.get(attemptingI), TileState.POWER_UP);
+                    }
+                }
+                break;
+            case 7:     //1
+            case 8:
+                tiles.replace(points.get(random.nextInt(points.size())), TileState.POWER_UP);
+                break;
+            default:    //0
+                break;
         }
     }
 

@@ -68,6 +68,7 @@ public class Ghost {
         startingPosition = position;
 
         try {
+            //todo rotate eyes according to movement
             normalSprite = ImageIO.read(new File("src/Images/Ghosts/" + color + ".png"));
             scaredSprite = ImageIO.read(new File("src/Images/Ghosts/scared.png"));
             sprite = normalSprite;
@@ -161,8 +162,8 @@ public class Ghost {
                 Random random = new Random();
 
                 SimpleDirection playerDirection = getClosestDirection(controller.getPlayer().getPosition());
-                boolean hasPerf = directionalOptions.contains(prefDirection);
                 boolean hasPlayer = directionalOptions.contains(playerDirection);
+                boolean hasPerf = directionalOptions.contains(prefDirection);
 
                 if (hasPerf && hasPlayer) {                                                                     //Both options  -> random from best options
                     if (random.nextBoolean()) {

@@ -205,18 +205,22 @@ public class PacMan extends Application {
         boolean isValidInput = false;
         switch (event.getCode()) {
             case W:
+            case UP:
                 playerDirection = SimpleDirection.UP;
                 isValidInput = true;
                 break;
             case S:
+            case DOWN:
                 playerDirection = SimpleDirection.DOWN;
                 isValidInput = true;
                 break;
             case A:
+            case LEFT:
                 playerDirection = SimpleDirection.LEFT;
                 isValidInput = true;
                 break;
             case D:
+            case RIGHT:
                 playerDirection = SimpleDirection.RIGHT;
                 isValidInput = true;
                 break;
@@ -231,6 +235,12 @@ public class PacMan extends Application {
                 break;
             case Z:
                 victory();
+                break;
+            case X:
+                powerUp();
+                break;
+            case C:
+                reset(true);
                 break;
         }
 
