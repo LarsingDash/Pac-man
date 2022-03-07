@@ -137,9 +137,7 @@ public class World {
                 controller.getGhosts().get(0).setReleased(true);
             } else if (score == 5) {
                 controller.getGhosts().get(1).setReleased(true);
-                tiles.put(new Point(10,12), TileState.EMPTY);
-                world = worldOpen;
-                controller.openGate();
+                openGate();
             } else if (score == 10) {
                 controller.getGhosts().get(2).setReleased(true);
                 controller.getGhosts().get(3).setReleased(true);
@@ -210,9 +208,16 @@ public class World {
         }
     }
 
+    public void openGate() {
+        tiles.put(new Point(10,12), TileState.EMPTY);
+        world = worldOpen;
+        controller.setGateOpen(true);
+    }
+
     public void closeGate() {
         tiles.remove(new Point(10, 12));
         world = worldClosed;
+        controller.setGateOpen(false);
     }
 
     //Getters Setters

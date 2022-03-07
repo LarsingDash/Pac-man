@@ -2,6 +2,7 @@ package Actors;
 
 import Enums.SimpleDirection;
 import Game.PacMan;
+import Game.World;
 import org.jfree.fx.FXGraphics2D;
 
 import javax.imageio.ImageIO;
@@ -17,8 +18,11 @@ import java.util.Random;
 public class Ghost {
     //Game and Properties
     private final PacMan controller;
+    private final World world;
 
     private BufferedImage sprite;
+    private BufferedImage normalSprite;
+    private BufferedImage scaredSprite;
 
     //Moving
     private Point position;
@@ -26,12 +30,21 @@ public class Ghost {
     private SimpleDirection direction = SimpleDirection.NONE;
     private final SimpleDirection prefDirection;
 
+    //Dead
+    private boolean isDead = false;
+    private int deadHor = 0;
+    private int deadVer = 0;
+    private int deadCounter = 0;
+
     //Other
     private boolean isReleased = false;
+    private final Point home = new Point(100, 110);
+    private int speed = 1;
 
     //Main methods
-    public Ghost(PacMan controller, String color) {
+    public Ghost(PacMan controller, World world, String color) {
         this.controller = controller;
+        this.world = world;
 
         switch (color) {
             case "red":
@@ -43,7 +56,7 @@ public class Ghost {
                 prefDirection = SimpleDirection.LEFT;
                 break;
             case "pink":
-                position = new Point(100, 110);
+                position = home;
                 prefDirection = SimpleDirection.DOWN;
                 break;
             default:
@@ -55,7 +68,9 @@ public class Ghost {
         startingPosition = position;
 
         try {
-            sprite = ImageIO.read(new File("src/Images/Ghosts/" + color + ".png"));
+            normalSprite = ImageIO.read(new File("src/Images/Ghosts/" + color + ".png"));
+            scaredSprite = ImageIO.read(new File("src/Images/Ghosts/scared.png"));
+            sprite = normalSprite;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -67,45 +82,64 @@ public class Ghost {
     }
 
     public void update() {
-        if (isReleased) {
-            move();
+        if (!isDead) {
+            if (isReleased) {
+                move();
 
-            Point playerPosition = controller.getPlayer().getPosition();
-            int deltaX = playerPosition.x - position.x;
-            int deltaY = playerPosition.y - position.y;
+                Point playerPosition = controller.getPlayer().getPosition();
+                int deltaX = playerPosition.x - position.x;
+                int deltaY = playerPosition.y - position.y;
 
-            if (deltaX >= -10 && deltaX <= 10 && deltaY >= -10 && deltaY <= 10) {
-                controller.collision();
+                if (deltaX >= -10 && deltaX <= 10 && deltaY >= -10 && deltaY <= 10) {
+                    controller.collision(this);
+                }
             }
+        } else {
+            move();
         }
     }
 
     //Movement
     public void move() {
-        if (position.x % 10 == 0 && position.y % 10 == 0) {
-            makeDecision();
+        if (!isDead) {
+            if (position.x % 10 == 0 && position.y % 10 == 0) {
+                makeDecision();
+            }
+        } else {
+            deadCounter++;
+
+            if (deadCounter == 10) {
+                position = new Point(home);
+                isDead = false;
+                speed = 1;
+                controller.killDone();
+                return;
+            }
+
+            position = new Point(position.x + deadHor, position.y + deadVer);
+            return;
         }
 
         switch (direction) {
             default:
                 break;
             case UP:
-                position = new Point(position.x, position.y + 1);
+                position = new Point(position.x, position.y + speed);
                 break;
             case DOWN:
-                position = new Point(position.x, position.y - 1);
+                position = new Point(position.x, position.y - speed);
                 break;
             case LEFT:
-                position = new Point(position.x - 1, position.y);
+                position = new Point(position.x - speed, position.y);
                 break;
             case RIGHT:
-                position = new Point(position.x + 1, position.y);
+                position = new Point(position.x + speed, position.y);
                 break;
         }
     }
 
     private void makeDecision() {
-        if (position.equals(new Point(100, 110))) {
+        if (position.equals(home)) {
             direction = SimpleDirection.UP;
             return;
         }
@@ -126,7 +160,7 @@ public class Ghost {
             } else {                                                                                    //...   -> check for preferred and playerDirection
                 Random random = new Random();
 
-                SimpleDirection playerDirection = getPlayerDirection();
+                SimpleDirection playerDirection = getClosestDirection(controller.getPlayer().getPosition());
                 boolean hasPerf = directionalOptions.contains(prefDirection);
                 boolean hasPlayer = directionalOptions.contains(playerDirection);
 
@@ -153,21 +187,19 @@ public class Ghost {
         }
     }
 
-    private SimpleDirection getPlayerDirection() {
-        Point playerPosition = controller.getPlayer().getPosition();
-
+    private SimpleDirection getClosestDirection(Point destination) {
         SimpleDirection closest;
-        int horDistance = position.x - playerPosition.x;
-        int verDistance = position.y - playerPosition.y;
+        int horDistance = position.x - destination.x;
+        int verDistance = position.y - destination.y;
 
-        if (Math.abs(horDistance) > Math.abs(verDistance)) {
+        if (Math.abs(horDistance) < Math.abs(verDistance)) {
             if (horDistance > 0) {
                 closest = SimpleDirection.LEFT;
             } else {
                 closest = SimpleDirection.RIGHT;
             }
         } else {
-            if (verDistance > 0) {
+            if (verDistance < 0) {
                 closest = SimpleDirection.DOWN;
             } else {
                 closest = SimpleDirection.UP;
@@ -182,6 +214,31 @@ public class Ghost {
         position = startingPosition;
         direction = SimpleDirection.NONE;
         isReleased = false;
+    }
+
+    public void kill() {
+        if (position.x % 2 == 1) {
+            position = new Point(position.x - 1, position.y);
+        }
+        if (position.y % 2 == 1) {
+            position = new Point(position.x, position.y - 1);
+        }
+
+        deadHor = (home.x - position.x) / 10;
+        deadVer = (home.y - position.y) / 10;
+        deadCounter = 0;
+
+        world.openGate();
+        isDead = true;
+        speed = 2;
+    }
+
+    public void playerPowerUp(boolean powerUp) {
+        if (powerUp) {
+            sprite = scaredSprite;
+        } else {
+            sprite = normalSprite;
+        }
     }
 
     //Getters and Setters

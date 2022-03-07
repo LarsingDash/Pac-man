@@ -33,7 +33,7 @@ public class PacMan extends Application {
     //Game
     private FXGraphics2D graphics;
     public boolean isRunning = true;
-    private File record = new File("src/Game/record.txt");
+    private final File record = new File("src/Game/record.txt");
 
     //Info
     private int level = 1;
@@ -58,6 +58,10 @@ public class PacMan extends Application {
     //PowerUp
     private boolean isPoweredUp = false;
     private int powerUpCounter = 0;
+
+    //Killing
+    private boolean isKilling = false;
+    private Ghost killedGhost = null;
 
     //Other
     private boolean gateOpen = false;
@@ -110,10 +114,10 @@ public class PacMan extends Application {
             }
         }.start();
 
-        ghosts.add(new Ghost(this, "red"));
-        ghosts.add(new Ghost(this, "pink"));
-        ghosts.add(new Ghost(this, "cyan"));
-        ghosts.add(new Ghost(this, "orange"));
+        ghosts.add(new Ghost(this, world, "red"));
+        ghosts.add(new Ghost(this, world, "pink"));
+        ghosts.add(new Ghost(this, world, "cyan"));
+        ghosts.add(new Ghost(this, world, "orange"));
     }
 
     private void drawWorld() {
@@ -124,47 +128,57 @@ public class PacMan extends Application {
     }
 
     private void update(int i) {
-        if (isRunning) {
-            if (i % 3 == 0) {
-                player.update();
+        if (!isKilling) {
+            if (isRunning) {
+                if (i % 3 == 0) {
+                    player.update();
 
-                for (Ghost ghost : ghosts) {
-                    ghost.update();
+                    for (Ghost ghost : ghosts) {
+                        ghost.update();
+                    }
+
+                    world.cycleBoosts();
                 }
 
-                world.cycleBoosts();
-            }
+                if (gateOpen && !isKilling) {
+                    boolean allOut = true;
 
-            if (gateOpen) {
-                boolean allOut = true;
+                    for (Ghost ghost : ghosts) {
+                        Point position = ghost.getPosition();
+                        if ((position.x > 80 && position.x < 120) && (position.y >= 110 && position.y <= 120)) {
+                            allOut = false;
+                            break;
+                        }
+                    }
 
-                for (Ghost ghost : ghosts) {
-                    Point position = ghost.getPosition();
-                    if ((position.x > 80 && position.x < 120) && (position.y >= 110 && position.y <= 120)) {
-                        allOut = false;
-                        break;
+                    if (allOut) {
+                        world.closeGate();
+                        gateOpen = false;
                     }
                 }
 
-                if (allOut) {
-                    world.closeGate();
-                    gateOpen = false;
+                if (hasWon && i % 20 == 0) {
+                    isVictoryVisible = !isVictoryVisible;
+                    updateInfoBox();
+                }
+
+                if (isPoweredUp) {
+                    powerUpCounter++;
+
+                    if (powerUpCounter == 600) {
+                        isPoweredUp = false;
+
+                        for (Ghost ghost : ghosts) {
+                            ghost.playerPowerUp(false);
+                        }
+
+                        player.powerUp(false);
+                    }
                 }
             }
-
-            if (hasWon && i % 20 == 0) {
-                isVictoryVisible = !isVictoryVisible;
-                updateInfoBox();
-            }
-
-            if (isPoweredUp) {
-                powerUpCounter++;
-
-                if (powerUpCounter == 600) {
-                    isPoweredUp = false;
-
-                    player.powerUp(false);
-                }
+        } else if (i % 5 == 0) {
+            if (killedGhost != null) {
+                killedGhost.update();
             }
         }
     }
@@ -198,7 +212,8 @@ public class PacMan extends Application {
                 isValidInput = true;
                 break;
             case SPACE:
-                collision();
+                powerUp();
+                collision(ghosts.get(0));
                 break;
         }
 
@@ -243,9 +258,11 @@ public class PacMan extends Application {
     }
 
     //Other
-    public void collision() {
+    public void collision(Ghost collidingGhost) {
         if (isPoweredUp) {
-            System.out.println("dede");
+            collidingGhost.kill();
+            killedGhost = collidingGhost;
+            isKilling = true;
         } else {
             if (isRunning) {
                 isRunning = false;
@@ -256,6 +273,10 @@ public class PacMan extends Application {
                 popUp.start();
             }
         }
+    }
+
+    public void killDone() {
+        isKilling = false;
     }
 
     private ArrayList<Integer> saveRecord() {
@@ -304,6 +325,10 @@ public class PacMan extends Application {
         isPoweredUp = true;
         powerUpCounter = 0;
 
+        for (Ghost ghost : ghosts) {
+            ghost.playerPowerUp(true);
+        }
+
         player.powerUp(true);
     }
 
@@ -338,11 +363,11 @@ public class PacMan extends Application {
         return world.getTiles().containsKey(checkingTile);
     }
 
-    public void openGate() {
-        gateOpen = true;
+    //Getters Setters
+    public void setGateOpen(boolean gateOpen) {
+        this.gateOpen = gateOpen;
     }
 
-    //Getters Setters
     public int getLevel() {
         return level;
     }

@@ -166,6 +166,13 @@ public class Player {
         } else {
             speed = 1;
         }
+
+        if (position.x % 2 == 1) {
+            position = new Point(position.x - 1, position.y);
+        }
+        if (position.y % 2 == 1) {
+            position = new Point(position.x, position.y - 1);
+        }
     }
 
     //Getters and Setters
