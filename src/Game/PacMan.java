@@ -17,8 +17,12 @@ import org.jfree.fx.FXGraphics2D;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 public class PacMan extends Application {
@@ -45,7 +49,7 @@ public class PacMan extends Application {
     private final Player player = new Player(this, world);
     private SimpleDirection playerDirection = SimpleDirection.NONE;
 
-    private ArrayList<Ghost> ghosts = new ArrayList<>();
+    private final ArrayList<Ghost> ghosts = new ArrayList<>();
 
     //Victory
     private boolean hasWon = false;
@@ -84,6 +88,7 @@ public class PacMan extends Application {
         scene.setOnKeyPressed(this::keyInput);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
+        primaryStage.setOnCloseRequest(event -> saveRecord());
         primaryStage.show();
 
         new AnimationTimer() {
@@ -94,7 +99,7 @@ public class PacMan extends Application {
             public void handle(long now) {
                 if (last == -1) last = now;
 
-                if (now - last > 60 / 1e9) {
+                if (now - last > (1 / 90d) * 1e9) {
                     i++;
                     if (i == 60) i = 0;
                     drawWorld();
@@ -192,6 +197,9 @@ public class PacMan extends Application {
                 playerDirection = SimpleDirection.RIGHT;
                 isValidInput = true;
                 break;
+            case SPACE:
+                collision();
+                break;
         }
 
         if (isValidInput) {
@@ -235,29 +243,39 @@ public class PacMan extends Application {
             if (isRunning) {
                 isRunning = false;
 
-                try (Scanner scanner = new Scanner(record)) {
-                    int recordLevel = scanner.nextInt();
-                    int recordScore = scanner.nextInt();
+                ArrayList<Integer> records = saveRecord();
 
-                    if ((recordLevel > level) || (recordLevel == level && world.getScore() > recordScore)) {
-                        scanner.close();
-
-                        try (PrintWriter fileWriter = new PrintWriter(record)) {
-                            System.out.println("writing");
-                            fileWriter.println(level);
-                            fileWriter.println(world.getScore());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-
-                DeathScreen deathScreen = new DeathScreen(this, world.getScore(), level);
+                DeathScreen deathScreen = new DeathScreen(this, records.get(0), records.get(1), world.getScore(), level);
                 deathScreen.start();
             }
         }
+    }
+
+    private ArrayList<Integer> saveRecord() {
+        ArrayList<Integer> records = new ArrayList<>(2);
+
+        try (Scanner scanner = new Scanner(record)) {
+
+            int recordLevel = scanner.nextInt();
+            int recordScore = scanner.nextInt();
+
+            Collections.addAll(records, recordLevel, recordScore);
+
+            if ((recordLevel < level) || (recordLevel == level && world.getScore() > recordScore)) {
+                scanner.close();
+
+                try (PrintWriter fileWriter = new PrintWriter(record)) {
+                    fileWriter.println(level);
+                    fileWriter.println(world.getScore());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return records;
     }
 
     public void reset() {
@@ -268,7 +286,7 @@ public class PacMan extends Application {
             ghost.reset();
         }
 
-        level = 0;
+        level = 1;
         isPoweredUp = false;
         gateOpen = false;
 

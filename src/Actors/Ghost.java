@@ -104,30 +104,76 @@ public class Ghost {
     }
 
     private void makeDecision() {
+        if (position.equals(new Point(100, 110))) {
+            direction = SimpleDirection.UP;
+            return;
+        }
+
         ArrayList<SimpleDirection> directionalOptions = new ArrayList<>(Arrays.asList(SimpleDirection.UP, SimpleDirection.DOWN, SimpleDirection.LEFT, SimpleDirection.RIGHT));
 
         directionalOptions.removeIf(option -> !controller.checkTile(option, position));
 
-        if (directionalOptions.isEmpty()) {
+        if (directionalOptions.isEmpty()) {                                                     //Empty -> blocked
             direction = SimpleDirection.NONE;
-        } else if (directionalOptions.size() == 1) {
+        } else if (directionalOptions.size() == 1) {                                            //1     -> only choice
             direction = directionalOptions.get(0);
-        } else {
+        } else {                                                                                //...   -> remove back
             directionalOptions.remove(direction.getOpposite());
 
-            if (directionalOptions.size() == 1) {
+            if (directionalOptions.size() == 1) {                                                       //1     -> only choice
                 direction = directionalOptions.get(0);
-            } else {
+            } else {                                                                                    //...   -> check for preferred and playerDirection
                 Random random = new Random();
 
-                if (directionalOptions.contains(prefDirection) && random.nextBoolean()) {
-                    direction = prefDirection;
-                    return;
-                }
+                SimpleDirection playerDirection = getPlayerDirection();
+                boolean hasPerf = directionalOptions.contains(prefDirection);
+                boolean hasPlayer = directionalOptions.contains(playerDirection);
 
-                direction = directionalOptions.get(random.nextInt(directionalOptions.size()));
+                if (hasPerf && hasPlayer) {                                                                     //Both options  -> random from best options
+                    if (random.nextBoolean()) {
+                        direction = prefDirection;
+                    } else {
+                        direction = playerDirection;
+                    }
+                } else if (hasPerf || hasPlayer) {                                                              //One option    -> random from best option or random
+                    if (random.nextBoolean()) {
+                        if (hasPerf) {
+                            direction = prefDirection;
+                        } else {
+                            direction = playerDirection;
+                        }
+                    } else {
+                        direction = directionalOptions.get(random.nextInt(directionalOptions.size()));
+                    }
+                } else {                                                                                        //None          -> random
+                    direction = directionalOptions.get(random.nextInt(directionalOptions.size()));
+                }
             }
         }
+    }
+
+    private SimpleDirection getPlayerDirection() {
+        Point playerPosition = controller.getPlayer().getPosition();
+
+        SimpleDirection closest;
+        int horDistance = position.x - playerPosition.x;
+        int verDistance = position.y - playerPosition.y;
+
+        if (Math.abs(horDistance) > Math.abs(verDistance)) {
+            if (horDistance > 0) {
+                closest = SimpleDirection.LEFT;
+            } else {
+                closest = SimpleDirection.RIGHT;
+            }
+        } else {
+            if (verDistance > 0) {
+                closest = SimpleDirection.DOWN;
+            } else {
+                closest = SimpleDirection.UP;
+            }
+        }
+
+        return closest;
     }
 
     public void reset() {
