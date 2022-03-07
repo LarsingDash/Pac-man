@@ -3,6 +3,8 @@ package Game;
 import Actors.Ghost;
 import Actors.Player;
 import Enums.SimpleDirection;
+import Game.Menus.PauseMenu;
+import Game.Menus.PopUp;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -13,6 +15,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.jfree.fx.FXGraphics2D;
 
 import java.awt.*;
@@ -32,8 +35,10 @@ public class PacMan extends Application {
 
     //Game
     private FXGraphics2D graphics;
-    public boolean isRunning = true;
+    private Stage stage;
+    private boolean isRunning = true;
     private final File record = new File("src/Game/record.txt");
+    private PauseMenu pauseMenu;
 
     //Info
     private int level = 1;
@@ -69,6 +74,7 @@ public class PacMan extends Application {
     //Game
     @Override
     public void start(Stage primaryStage) {
+        stage = primaryStage;
         Canvas canvas = new Canvas(630, 660);
         canvas.setScaleY(-1);
         graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
@@ -90,10 +96,13 @@ public class PacMan extends Application {
         VBox layout = new VBox(info, canvas);
         Scene scene = new Scene(layout);
         scene.setOnKeyPressed(this::keyInput);
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
-        primaryStage.setOnCloseRequest(event -> saveRecord());
-        primaryStage.show();
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.setOnCloseRequest(event -> saveRecord());
+        stage.show();
+
+        pauseMenu = new PauseMenu(this);
 
         new AnimationTimer() {
             long last = -1;
@@ -106,9 +115,11 @@ public class PacMan extends Application {
                 if (now - last > (1 / 90d) * 1e9) {
                     i++;
                     if (i == 60) i = 0;
-                    drawWorld();
-                    update(i);
-                    drawObjects();
+                    if (isRunning) {
+                        drawWorld();
+                        update(i);
+                        drawObjects();
+                    }
                     last = now;
                 }
             }
@@ -129,51 +140,49 @@ public class PacMan extends Application {
 
     private void update(int i) {
         if (!isKilling) {
-            if (isRunning) {
-                if (i % 3 == 0) {
-                    player.update();
+            if (i % 3 == 0) {
+                player.update();
+
+                for (Ghost ghost : ghosts) {
+                    ghost.update();
+                }
+
+                world.cycleBoosts();
+            }
+
+            if (gateOpen && !isKilling) {
+                boolean allOut = true;
+
+                for (Ghost ghost : ghosts) {
+                    Point position = ghost.getPosition();
+                    if ((position.x > 80 && position.x < 120) && (position.y >= 110 && position.y <= 120)) {
+                        allOut = false;
+                        break;
+                    }
+                }
+
+                if (allOut) {
+                    world.closeGate();
+                    gateOpen = false;
+                }
+            }
+
+            if (hasWon && i % 20 == 0) {
+                isVictoryVisible = !isVictoryVisible;
+                updateInfoBox();
+            }
+
+            if (isPoweredUp) {
+                powerUpCounter++;
+
+                if (powerUpCounter == 600) {
+                    isPoweredUp = false;
 
                     for (Ghost ghost : ghosts) {
-                        ghost.update();
+                        ghost.playerPowerUp(false);
                     }
 
-                    world.cycleBoosts();
-                }
-
-                if (gateOpen && !isKilling) {
-                    boolean allOut = true;
-
-                    for (Ghost ghost : ghosts) {
-                        Point position = ghost.getPosition();
-                        if ((position.x > 80 && position.x < 120) && (position.y >= 110 && position.y <= 120)) {
-                            allOut = false;
-                            break;
-                        }
-                    }
-
-                    if (allOut) {
-                        world.closeGate();
-                        gateOpen = false;
-                    }
-                }
-
-                if (hasWon && i % 20 == 0) {
-                    isVictoryVisible = !isVictoryVisible;
-                    updateInfoBox();
-                }
-
-                if (isPoweredUp) {
-                    powerUpCounter++;
-
-                    if (powerUpCounter == 600) {
-                        isPoweredUp = false;
-
-                        for (Ghost ghost : ghosts) {
-                            ghost.playerPowerUp(false);
-                        }
-
-                        player.powerUp(false);
-                    }
+                    player.powerUp(false);
                 }
             }
         } else if (i % 5 == 0) {
@@ -211,10 +220,14 @@ public class PacMan extends Application {
                 playerDirection = SimpleDirection.RIGHT;
                 isValidInput = true;
                 break;
-            case SPACE:
-                powerUp();
-                collision(ghosts.get(0));
-                break;
+            case ESCAPE:
+                if (isRunning) {
+                    pauseMenu.open();
+                } else {
+                    pauseMenu.close();
+                }
+
+                isRunning = !isRunning;
         }
 
         if (isValidInput) {
@@ -279,7 +292,7 @@ public class PacMan extends Application {
         isKilling = false;
     }
 
-    private ArrayList<Integer> saveRecord() {
+    public ArrayList<Integer> saveRecord() {
         ArrayList<Integer> records = new ArrayList<>(2);
 
         try (Scanner scanner = new Scanner(record)) {
@@ -378,5 +391,13 @@ public class PacMan extends Application {
 
     public ArrayList<Ghost> getGhosts() {
         return ghosts;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 }

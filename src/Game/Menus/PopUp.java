@@ -1,5 +1,6 @@
-package Game;
+package Game.Menus;
 
+import Game.PacMan;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
