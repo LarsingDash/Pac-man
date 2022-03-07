@@ -147,7 +147,7 @@ public class World {
     }
 
     private void updateScore() {
-        controller.updateScore(score + "\t/\t" + maxScore);
+        controller.updateScore(score + " / " + maxScore);
     }
 
     public void reset() {

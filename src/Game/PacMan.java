@@ -12,8 +12,10 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.jfree.fx.FXGraphics2D;
@@ -25,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
@@ -39,14 +42,19 @@ public class PacMan extends Application {
     private boolean isRunning = true;
     private final File record = new File("src/Game/record.txt");
     private PauseMenu pauseMenu;
+    private final int FPS = 90;
 
     //Info
     private int level = 1;
-    private final Label levelLabel = new Label("Level: " + level + "\t/\t10");
+    private final Label levelLabel = new Label("Level\n" + level + " / 10");
     private final Label scoreCounter = new Label("");
-    private final Label credits = new Label("Pac-Man by LarsingDash");
-    private final Label victoryLabel = new Label("VICTORY");
-    private final HBox info = new HBox(levelLabel, credits, scoreCounter);
+
+    private final Label powerUpLabel = new Label("Power-Up\nOff");
+    private final Label credits = new Label("Pac-Man by\nLarsingDash");
+    private final ArrayList<Label> victoryLabels = new ArrayList<>(Arrays.asList(new Label("VICTORY"), new Label("VICTORY"), new Label("VICTORY"), new Label("VICTORY")));
+
+    private final Font font = new Font("Arial Black", 16);
+    private final GridPane info = new GridPane();
 
     //Game elements
     private final World world = new World(this);
@@ -80,20 +88,10 @@ public class PacMan extends Application {
         graphics = new FXGraphics2D(canvas.getGraphicsContext2D());
         graphics.setBackground(Color.BLACK);
 
-        updateInfoBox();
-        info.setMinHeight(21);
+        updateInfo();
+        initializeLayout();
 
-        levelLabel.setMinWidth(210);
-        credits.setMinWidth(210);
-        scoreCounter.setMinWidth(210);
-        victoryLabel.setMinWidth(210);
-
-        levelLabel.setAlignment(Pos.CENTER);
-        credits.setAlignment(Pos.CENTER);
-        scoreCounter.setAlignment(Pos.CENTER);
-        victoryLabel.setAlignment(Pos.CENTER);
-
-        VBox layout = new VBox(info, canvas);
+        Pane layout = new Pane(canvas, info);
         Scene scene = new Scene(layout);
         scene.setOnKeyPressed(this::keyInput);
         stage.initStyle(StageStyle.UNDECORATED);
@@ -112,14 +110,16 @@ public class PacMan extends Application {
             public void handle(long now) {
                 if (last == -1) last = now;
 
-                if (now - last > (1 / 90d) * 1e9) {
+                if (now - last > (1d / FPS) * 1e9) {
                     i++;
-                    if (i == 60) i = 0;
+                    if (i == FPS) i = 0;
+
                     if (isRunning) {
                         drawWorld();
                         update(i);
                         drawObjects();
                     }
+
                     last = now;
                 }
             }
@@ -131,6 +131,61 @@ public class PacMan extends Application {
         ghosts.add(new Ghost(this, world, "orange"));
     }
 
+    private void initializeLayout() {
+        //Info
+        info.setAlignment(Pos.CENTER);
+        info.setTranslateY(210);
+        info.setMinHeight(210);
+        info.setMinWidth(630);
+        info.setVgap(30);
+        info.setHgap(330);
+
+        //Widths
+        levelLabel.setMinWidth(120);
+        credits.setMinWidth(120);
+        scoreCounter.setMinWidth(120);
+        powerUpLabel.setMinWidth(120);
+        for (Label victoryLabel : victoryLabels) {
+            victoryLabel.setMinWidth(120);
+        }
+
+        //Heights
+        levelLabel.setMinHeight(90);
+        credits.setMinHeight(90);
+        scoreCounter.setMinHeight(90);
+        powerUpLabel.setMinHeight(90);
+        for (Label victoryLabel : victoryLabels) {
+            victoryLabel.setMinHeight(90);
+        }
+
+        //Alignments
+        levelLabel.setAlignment(Pos.CENTER);
+        scoreCounter.setAlignment(Pos.CENTER);
+        credits.setAlignment(Pos.CENTER);
+        powerUpLabel.setAlignment(Pos.CENTER);
+        for (Label victoryLabel : victoryLabels) {
+            victoryLabel.setAlignment(Pos.CENTER);
+        }
+
+        //TextAlignments
+        levelLabel.setTextAlignment(TextAlignment.CENTER);
+        scoreCounter.setTextAlignment(TextAlignment.CENTER);
+        credits.setTextAlignment(TextAlignment.CENTER);
+        powerUpLabel.setTextAlignment(TextAlignment.CENTER);
+        for (Label victoryLabel : victoryLabels) {
+            victoryLabel.setTextAlignment(TextAlignment.CENTER);
+        }
+
+        //Fonts
+        levelLabel.setFont(font);
+        scoreCounter.setFont(font);
+        credits.setFont(font);
+        powerUpLabel.setFont(font);
+        for (Label victoryLabel : victoryLabels) {
+            victoryLabel.setFont(font);
+        }
+    }
+
     private void drawWorld() {
         graphics.setTransform(new AffineTransform());
         graphics.clearRect(0, 0, 630, 660);
@@ -140,7 +195,7 @@ public class PacMan extends Application {
 
     private void update(int i) {
         if (!isKilling) {
-            if (i % 3 == 0) {
+            if (i % 2 == 0) {
                 player.update();
 
                 for (Ghost ghost : ghosts) {
@@ -167,16 +222,18 @@ public class PacMan extends Application {
                 }
             }
 
-            if (hasWon && i % 20 == 0) {
+            if (hasWon && i % 30 == 0) {
                 isVictoryVisible = !isVictoryVisible;
-                updateInfoBox();
+                updateInfo();
             }
 
             if (isPoweredUp) {
                 powerUpCounter++;
+                powerUpLabel.setText("Power-Up\n" + (int) (((FPS * 7 - powerUpCounter) / (double) (FPS * 7)) * 100) + "%");
 
-                if (powerUpCounter == 600) {
+                if (powerUpCounter == FPS * 7) {
                     isPoweredUp = false;
+                    powerUpLabel.setText("Power-Up\nOff");
 
                     for (Ghost ghost : ghosts) {
                         ghost.playerPowerUp(false);
@@ -250,22 +307,33 @@ public class PacMan extends Application {
             if (hasWon) {
                 hasWon = false;
                 isVictoryVisible = false;
-                updateInfoBox();
+                updateInfo();
             }
         }
     }
 
     //Info
-    private void updateInfoBox() {
-        if (isVictoryVisible) {
-            info.getChildren().set(1, victoryLabel);
+    private void updateInfo() {
+        info.getChildren().clear();
+        levelLabel.setText("Level\n" + level + " / 10");
+        if (isPoweredUp) {
+            powerUpLabel.setText("Power-Up\n" + (int) (((FPS * 7 - powerUpCounter) / (double) (FPS * 7)) * 100) + "%");
         } else {
-            info.getChildren().set(1, credits);
+            powerUpLabel.setText("Power-Up\nOff");
+
+        }
+
+        if (isVictoryVisible) {
+            info.addColumn(0, victoryLabels.get(0), victoryLabels.get(1));
+            info.addColumn(1, victoryLabels.get(2), victoryLabels.get(3));
+        } else {
+            info.addColumn(0, levelLabel, scoreCounter);
+            info.addColumn(1, credits, powerUpLabel);
         }
     }
 
     public void updateScore(String text) {
-        scoreCounter.setText("Score: " + text);
+        scoreCounter.setText("Score\n" + text);
     }
 
     public void victory() {
@@ -278,7 +346,7 @@ public class PacMan extends Application {
             popUp.start();
         } else {
             level++;
-            levelLabel.setText("Level: " + level + "\t/\t10");
+            updateInfo();
 
             reset(false);
         }
@@ -335,7 +403,6 @@ public class PacMan extends Application {
 
     public void reset(boolean full) {
         if (full) level = 1;
-        levelLabel.setText("Level: " + level + "\t/\t10");
 
         world.reset();
         player.reset();
@@ -345,7 +412,10 @@ public class PacMan extends Application {
         }
 
         isPoweredUp = false;
+        powerUpCounter = 0;
         gateOpen = false;
+
+        updateInfo();
 
         isRunning = true;
     }
