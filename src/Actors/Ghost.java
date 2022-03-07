@@ -80,6 +80,7 @@ public class Ghost {
         }
     }
 
+    //Movement
     public void move() {
         if (position.x % 10 == 0 && position.y % 10 == 0) {
             makeDecision();
@@ -176,6 +177,7 @@ public class Ghost {
         return closest;
     }
 
+    //Other
     public void reset() {
         position = startingPosition;
         direction = SimpleDirection.NONE;

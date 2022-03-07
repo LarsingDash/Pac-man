@@ -229,10 +229,17 @@ public class PacMan extends Application {
     public void victory() {
         hasWon = true;
 
-        level++;
-        levelLabel.setText("Level: " + level + "\t/\t10");
+        if (level == 10) {
+            saveRecord();
 
-        reset();
+            PopUp popUp = new PopUp(this, false, 10, world.maxScore, world.maxScore, 10);
+            popUp.start();
+        } else {
+            level++;
+            levelLabel.setText("Level: " + level + "\t/\t10");
+
+            reset(false);
+        }
     }
 
     //Other
@@ -245,8 +252,8 @@ public class PacMan extends Application {
 
                 ArrayList<Integer> records = saveRecord();
 
-                DeathScreen deathScreen = new DeathScreen(this, records.get(0), records.get(1), world.getScore(), level);
-                deathScreen.start();
+                PopUp popUp = new PopUp(this, true, records.get(0), records.get(1), world.getScore(), level);
+                popUp.start();
             }
         }
     }
@@ -278,7 +285,7 @@ public class PacMan extends Application {
         return records;
     }
 
-    public void reset() {
+    public void reset(boolean full) {
         world.reset();
         player.reset();
 
@@ -286,7 +293,7 @@ public class PacMan extends Application {
             ghost.reset();
         }
 
-        level = 1;
+        if (full) level = 1;
         isPoweredUp = false;
         gateOpen = false;
 
