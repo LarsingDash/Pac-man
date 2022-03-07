@@ -24,3 +24,4 @@ hs_err_pid*
 replay_pid*
 src/Images/
 out/
+src/Game/record.txt

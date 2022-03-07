@@ -24,12 +24,14 @@ public class DeathScreen extends Stage {
 
     public void start() {
         Label death = new Label("You died!");
-        Label info = new Label("Level: " + level + "\t\t|\t" + "Score: " + score);
+        Label score = new Label("Level: " + level + "\t\t|\t" + "Score: " + this.score);
+        Label record = new Label("Level: " + level + "\t\t|\t" + "Score: " + this.score);
         Button restart = new Button("restart");
-        VBox content = new VBox(death, info, restart);
+        VBox content = new VBox(death, score, restart);
 
         death.setAlignment(Pos.CENTER);
-        info.setAlignment(Pos.CENTER);
+        score.setAlignment(Pos.CENTER);
+        record.setAlignment(Pos.CENTER);
         restart.setAlignment(Pos.CENTER);
         content.setAlignment(Pos.CENTER);
 

@@ -17,7 +17,9 @@ import org.jfree.fx.FXGraphics2D;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class PacMan extends Application {
     public static void main(String[] args) {
@@ -25,8 +27,9 @@ public class PacMan extends Application {
     }
 
     //Game
-    public FXGraphics2D graphics;
+    private FXGraphics2D graphics;
     public boolean isRunning = true;
+    private File record = new File("src/Game/record.txt");
 
     //Info
     private int level = 1;
@@ -231,6 +234,26 @@ public class PacMan extends Application {
         } else {
             if (isRunning) {
                 isRunning = false;
+
+                try (Scanner scanner = new Scanner(record)) {
+                    int recordLevel = scanner.nextInt();
+                    int recordScore = scanner.nextInt();
+
+                    if ((recordLevel > level) || (recordLevel == level && world.getScore() > recordScore)) {
+                        scanner.close();
+
+                        try (PrintWriter fileWriter = new PrintWriter(record)) {
+                            System.out.println("writing");
+                            fileWriter.println(level);
+                            fileWriter.println(world.getScore());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
                 DeathScreen deathScreen = new DeathScreen(this, world.getScore(), level);
                 deathScreen.start();
             }
