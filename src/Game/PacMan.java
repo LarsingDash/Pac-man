@@ -431,7 +431,8 @@ public class PacMan extends Application {
         player.powerUp(true);
     }
 
-    public boolean checkTile(SimpleDirection direction, Point position) {
+    public boolean checkTile(SimpleDirection direction, Point position, boolean isPlayer) {
+
         //Make current point
         Point currentTile;
         if (direction == SimpleDirection.LEFT) {
@@ -456,6 +457,11 @@ public class PacMan extends Application {
             default:
                 checkingTile = new Point(currentTile.x + 1, currentTile.y);
                 break;
+        }
+
+        System.out.println();
+        if (checkingTile.equals(new Point(10, 12)) && isPlayer) {
+            return false;
         }
 
         //Checking

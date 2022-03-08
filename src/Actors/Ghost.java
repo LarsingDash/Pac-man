@@ -158,7 +158,7 @@ public class Ghost {
 
         ArrayList<SimpleDirection> directionalOptions = new ArrayList<>(Arrays.asList(SimpleDirection.UP, SimpleDirection.DOWN, SimpleDirection.LEFT, SimpleDirection.RIGHT));
 
-        directionalOptions.removeIf(option -> !controller.checkTile(option, position));
+        directionalOptions.removeIf(option -> !controller.checkTile(option, position, false));
 
         if (directionalOptions.isEmpty()) {                                                     //Empty -> blocked
             setDirection(SimpleDirection.NONE);

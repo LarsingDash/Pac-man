@@ -136,7 +136,7 @@ public class Player {
                 break;
         }
 
-        if (controller.checkTile(direction, position)) {
+        if (controller.checkTile(direction, position, true)) {
             if (direction == bufferedDirection) {
                 if ((position.x % 10 == 0 && position.y % 10 == 0) || bufferedDirection.isOpposite(currentDirection)) {
                     position = attemptingPosition;
