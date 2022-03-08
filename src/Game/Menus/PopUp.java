@@ -35,6 +35,8 @@ public class PopUp extends Stage {
 
         this.score = score;
         this.level = level;
+
+        setOnCloseRequest(event -> controller.reset(true));
     }
 
     public void start() {

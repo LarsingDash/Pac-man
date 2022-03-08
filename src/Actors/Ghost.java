@@ -44,7 +44,6 @@ public class Ghost {
     //Other
     private boolean isReleased = false;
     private final Point home = new Point(100, 110);
-    private int speed = 1;
 
     //Main methods
     public Ghost(PacMan controller, World world, String color) {
@@ -123,7 +122,6 @@ public class Ghost {
             if (deadCounter == 10) {
                 position = new Point(home);
                 isDead = false;
-                speed = 1;
                 controller.killDone();
                 return;
             }
@@ -136,16 +134,16 @@ public class Ghost {
             default:
                 break;
             case UP:
-                position = new Point(position.x, position.y + speed);
+                position = new Point(position.x, position.y + 1);
                 break;
             case DOWN:
-                position = new Point(position.x, position.y - speed);
+                position = new Point(position.x, position.y - 1);
                 break;
             case LEFT:
-                position = new Point(position.x - speed, position.y);
+                position = new Point(position.x - 1, position.y);
                 break;
             case RIGHT:
-                position = new Point(position.x + speed, position.y);
+                position = new Point(position.x + 1, position.y);
                 break;
         }
     }
@@ -245,7 +243,6 @@ public class Ghost {
         deadCounter = 0;
 
         world.openGate();
-        speed = 2;
         isDead = true;
     }
 

@@ -341,6 +341,9 @@ public class PacMan extends Application {
 
         if (level == 10) {
             saveRecord();
+            isVictoryVisible = true;
+            isRunning = false;
+            updateInfo();
 
             PopUp popUp = new PopUp(this, false, 10, world.maxScore, world.maxScore, 10);
             popUp.start();
@@ -459,7 +462,6 @@ public class PacMan extends Application {
                 break;
         }
 
-        System.out.println();
         if (checkingTile.equals(new Point(10, 12)) && isPlayer) {
             return false;
         }

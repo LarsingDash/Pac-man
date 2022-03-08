@@ -17,13 +17,13 @@
 *.zip
 *.tar.gz
 *.rar
+*.txt
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
 src/Images/
 out/
-src/Game/record.txt
 out/production/Images/
-.idea/inspectionProfiles/Project_Default.xml
-.idea/.name
+.idea/
+.src/Game/record.txt
