@@ -21,8 +21,13 @@ public class Ghost {
     private final World world;
 
     private BufferedImage sprite;
-    private BufferedImage normalSprite;
+    private final BufferedImage normalSprite;
     private BufferedImage scaredSprite;
+
+    private BufferedImage spriteUp;
+    private BufferedImage spriteDown;
+    private BufferedImage spriteLeft;
+    private BufferedImage spriteRight;
 
     //Moving
     private Point position;
@@ -46,35 +51,41 @@ public class Ghost {
         this.controller = controller;
         this.world = world;
 
+        try {
+            spriteUp = ImageIO.read(new File("src/Images/Ghosts/" + color + "/up.png"));
+            spriteDown = ImageIO.read(new File("src/Images/Ghosts/" + color + "/down.png"));
+            spriteLeft = ImageIO.read(new File("src/Images/Ghosts/" + color + "/left.png"));
+            spriteRight = ImageIO.read(new File("src/Images/Ghosts/" + color + "/right.png"));
+            scaredSprite = ImageIO.read(new File("src/Images/Ghosts/scared.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         switch (color) {
             case "red":
                 position = new Point(100, 130);
                 prefDirection = SimpleDirection.UP;
+                normalSprite = spriteUp;
                 break;
             case "cyan":
                 position = new Point(90, 110);
                 prefDirection = SimpleDirection.LEFT;
+                normalSprite = spriteLeft;
                 break;
             case "pink":
                 position = home;
                 prefDirection = SimpleDirection.DOWN;
+                normalSprite = spriteDown;
                 break;
             default:
                 position = new Point(110, 110);
                 prefDirection = SimpleDirection.RIGHT;
+                normalSprite = spriteRight;
                 break;
         }
 
+        sprite = normalSprite;
         startingPosition = position;
-
-        try {
-            //todo rotate eyes according to movement
-            normalSprite = ImageIO.read(new File("src/Images/Ghosts/" + color + ".png"));
-            scaredSprite = ImageIO.read(new File("src/Images/Ghosts/scared.png"));
-            sprite = normalSprite;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void draw(FXGraphics2D graphics) {
@@ -141,7 +152,7 @@ public class Ghost {
 
     private void makeDecision() {
         if (position.equals(home)) {
-            direction = SimpleDirection.UP;
+            setDirection(SimpleDirection.UP);
             return;
         }
 
@@ -150,14 +161,14 @@ public class Ghost {
         directionalOptions.removeIf(option -> !controller.checkTile(option, position));
 
         if (directionalOptions.isEmpty()) {                                                     //Empty -> blocked
-            direction = SimpleDirection.NONE;
+            setDirection(SimpleDirection.NONE);
         } else if (directionalOptions.size() == 1) {                                            //1     -> only choice
-            direction = directionalOptions.get(0);
+            setDirection(directionalOptions.get(0));
         } else {                                                                                //...   -> remove back
             directionalOptions.remove(direction.getOpposite());
 
             if (directionalOptions.size() == 1) {                                                       //1     -> only choice
-                direction = directionalOptions.get(0);
+                setDirection(directionalOptions.get(0));
             } else {                                                                                    //...   -> check for preferred and playerDirection
                 Random random = new Random();
 
@@ -167,22 +178,22 @@ public class Ghost {
 
                 if (hasPerf && hasPlayer) {                                                                     //Both options  -> random from best options
                     if (random.nextBoolean()) {
-                        direction = prefDirection;
+                        setDirection(prefDirection);
                     } else {
-                        direction = playerDirection;
+                        setDirection(playerDirection);
                     }
                 } else if (hasPerf || hasPlayer) {                                                              //One option    -> random from best option or random
                     if (random.nextBoolean()) {
                         if (hasPerf) {
-                            direction = prefDirection;
+                            setDirection(prefDirection);
                         } else {
-                            direction = playerDirection;
+                            setDirection(playerDirection);
                         }
                     } else {
-                        direction = directionalOptions.get(random.nextInt(directionalOptions.size()));
+                        setDirection(directionalOptions.get(random.nextInt(directionalOptions.size())));
                     }
                 } else {                                                                                        //None          -> random
-                    direction = directionalOptions.get(random.nextInt(directionalOptions.size()));
+                    setDirection(directionalOptions.get(random.nextInt(directionalOptions.size())));
                 }
             }
         }
@@ -213,7 +224,7 @@ public class Ghost {
     //Other
     public void reset() {
         position = startingPosition;
-        direction = SimpleDirection.NONE;
+        setDirection(SimpleDirection.NONE);
         isReleased = false;
         sprite = normalSprite;
     }
@@ -250,5 +261,24 @@ public class Ghost {
 
     public Point getPosition() {
         return position;
+    }
+
+    private void setDirection(SimpleDirection direction) {
+        this.direction = direction;
+
+        switch (direction) {
+            default:
+                sprite = spriteUp;
+                break;
+            case DOWN:
+                sprite = spriteDown;
+                break;
+            case LEFT:
+                sprite = spriteLeft;
+                break;
+            case RIGHT:
+                sprite = spriteRight;
+                break;
+        }
     }
 }
