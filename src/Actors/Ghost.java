@@ -226,7 +226,10 @@ public class Ghost {
         position = startingPosition;
         setDirection(SimpleDirection.NONE);
         isReleased = false;
-        sprite = normalSprite;
+
+        if  (!isDead) {
+            sprite = normalSprite;
+        }
     }
 
     public void kill() {
@@ -242,8 +245,8 @@ public class Ghost {
         deadCounter = 0;
 
         world.openGate();
-        isDead = true;
         speed = 2;
+        isDead = true;
     }
 
     public void playerPowerUp(boolean powerUp) {
@@ -266,19 +269,21 @@ public class Ghost {
     private void setDirection(SimpleDirection direction) {
         this.direction = direction;
 
-        switch (direction) {
-            default:
-                sprite = spriteUp;
-                break;
-            case DOWN:
-                sprite = spriteDown;
-                break;
-            case LEFT:
-                sprite = spriteLeft;
-                break;
-            case RIGHT:
-                sprite = spriteRight;
-                break;
+        if (sprite != scaredSprite) {
+            switch (direction) {
+                default:
+                    sprite = spriteUp;
+                    break;
+                case DOWN:
+                    sprite = spriteDown;
+                    break;
+                case LEFT:
+                    sprite = spriteLeft;
+                    break;
+                case RIGHT:
+                    sprite = spriteRight;
+                    break;
+            }
         }
     }
 }
