@@ -21,12 +21,14 @@ public class PauseMenu extends Stage {
 
         Button resume = new Button("Resume");
         resume.setOnAction(event -> {
+            PacMan.playSound("play");
             controller.setRunning(true);
             close();
         });
 
         Button quit = new Button("Quit");
         quit.setOnAction(event -> {
+            PacMan.playSound("quit");
             controller.saveRecord();
             controller.getStage().close();
             close();
@@ -47,5 +49,6 @@ public class PauseMenu extends Stage {
         show();
         setX(controller.getStage().getX() + 260);
         setY(controller.getStage().getY() + 286);
+        PacMan.playSound("quit");
     }
 }

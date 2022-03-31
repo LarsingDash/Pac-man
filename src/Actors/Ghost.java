@@ -244,6 +244,8 @@ public class Ghost {
 
         world.openGate();
         isDead = true;
+
+        PacMan.playSound("death");
     }
 
     public void playerPowerUp(boolean powerUp) {

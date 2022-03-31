@@ -125,6 +125,9 @@ public class World {
         if (tiles.get(tile) != TileState.EMPTY) {
             if (tiles.get(tile) == TileState.POWER_UP) {
                 controller.powerUp();
+                PacMan.playSound("powerUp");
+            } else {
+                PacMan.playSound("coin");
             }
 
             tiles.put(tile, TileState.EMPTY);

@@ -20,6 +20,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.jfree.fx.FXGraphics2D;
 
+import javax.sound.sampled.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.File;
@@ -32,9 +33,11 @@ import java.util.Collections;
 import java.util.Scanner;
 
 public class PacMan extends Application {
+
     public static void main(String[] args) {
         PacMan.launch();
     }
+
 
     //Game
     private FXGraphics2D graphics;
@@ -129,6 +132,8 @@ public class PacMan extends Application {
         ghosts.add(new Ghost(this, world, "pink"));
         ghosts.add(new Ghost(this, world, "cyan"));
         ghosts.add(new Ghost(this, world, "orange"));
+
+        playSound("play");
     }
 
     private void initializeLayout() {
@@ -338,6 +343,7 @@ public class PacMan extends Application {
 
     public void victory() {
         hasWon = true;
+        PacMan.playSound("victory");
 
         if (level == 10) {
             saveRecord();
@@ -356,6 +362,19 @@ public class PacMan extends Application {
     }
 
     //Other
+    public static void playSound(String filename) {
+        try {
+            File file = new File("src/Audio/" + filename + ".wav");
+            AudioInputStream stream = AudioSystem.getAudioInputStream(file);
+            Clip clip = AudioSystem.getClip();
+            clip.open(stream);
+
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void collision(Ghost collidingGhost) {
         if (isPoweredUp) {
             collidingGhost.kill();
@@ -424,6 +443,8 @@ public class PacMan extends Application {
     }
 
     public void powerUp() {
+        PacMan.playSound("powerUp");
+
         isPoweredUp = true;
         powerUpCounter = 0;
 

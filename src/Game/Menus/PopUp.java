@@ -36,7 +36,7 @@ public class PopUp extends Stage {
         this.score = score;
         this.level = level;
 
-        setOnCloseRequest(event -> controller.reset(true));
+        setOnCloseRequest(event -> restart());
     }
 
     public void start() {
@@ -59,11 +59,16 @@ public class PopUp extends Stage {
         content.setSpacing(10);
 
         restart.setOnAction(event -> {
-            controller.reset(true);
+            restart();
             close();
         });
 
         setScene(new Scene(content));
         show();
+    }
+
+    private void restart() {
+        controller.reset(true);
+        PacMan.playSound("play");
     }
 }
