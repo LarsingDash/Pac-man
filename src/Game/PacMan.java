@@ -23,10 +23,7 @@ import org.jfree.fx.FXGraphics2D;
 import javax.sound.sampled.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +37,7 @@ public class PacMan extends Application {
 
 
     //Game
+    private static String susMode;
     private FXGraphics2D graphics;
     private Stage stage;
     private boolean isRunning = true;
@@ -100,10 +98,8 @@ public class PacMan extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setScene(scene);
         stage.setResizable(false);
-        stage.setOnCloseRequest(event -> saveRecord());
+        stage.setOnCloseRequest(event -> save());
         stage.show();
-
-        pauseMenu = new PauseMenu(this);
 
         new AnimationTimer() {
             long last = -1;
@@ -132,6 +128,9 @@ public class PacMan extends Application {
         ghosts.add(new Ghost(this, world, "pink"));
         ghosts.add(new Ghost(this, world, "cyan"));
         ghosts.add(new Ghost(this, world, "orange"));
+
+        loadSettings();
+        pauseMenu = new PauseMenu(this);
 
         playSound("play");
     }
@@ -364,7 +363,7 @@ public class PacMan extends Application {
     //Other
     public static void playSound(String filename) {
         try {
-            File file = new File("src/Audio/" + filename + ".wav");
+            File file = new File("src/Audio/" + filename + susMode + ".wav");
             AudioInputStream stream = AudioSystem.getAudioInputStream(file);
             Clip clip = AudioSystem.getClip();
             clip.open(stream);
@@ -394,6 +393,25 @@ public class PacMan extends Application {
 
     public void killDone() {
         isKilling = false;
+    }
+
+    public void loadSettings() {
+        try (Scanner scanner = new Scanner(new File("src/Game/settings.txt"))) {
+            susMode = scanner.nextLine();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void save() {
+        saveRecord();
+
+        try (FileWriter writer = new FileWriter("src/Game/settings.txt")) {
+            writer.write(susMode);
+            System.out.println(susMode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public ArrayList<Integer> saveRecord() {
@@ -514,5 +532,13 @@ public class PacMan extends Application {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public static void setSusMode(String susMode) {
+        PacMan.susMode = susMode;
+    }
+
+    public static String getSusMode() {
+        return susMode;
     }
 }

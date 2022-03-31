@@ -4,6 +4,8 @@ import Game.PacMan;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -29,14 +31,24 @@ public class PauseMenu extends Stage {
         Button quit = new Button("Quit");
         quit.setOnAction(event -> {
             PacMan.playSound("quit");
-            controller.saveRecord();
+            controller.save();
             controller.getStage().close();
             close();
         });
 
-        VBox content = new VBox(resume, quit);
+        ToggleButton susMode = new ToggleButton("Just don't");
+        susMode.setOnAction(event -> {
+            if (susMode.isSelected()) {
+                PacMan.setSusMode("Sus");
+            } else {
+                PacMan.setSusMode("Normal");
+            }
+        });
+        susMode.setSelected(!PacMan.getSusMode().equals("Normal"));
+
+        VBox content = new VBox(resume, quit, susMode);
         content.setAlignment(Pos.CENTER);
-        content.setSpacing(25);
+        content.setSpacing(10);
 
         Scene scene = new Scene(content);
         initStyle(StageStyle.TRANSPARENT);
