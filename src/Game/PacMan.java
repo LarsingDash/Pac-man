@@ -202,7 +202,7 @@ public class PacMan extends Application {
                     ghost.update();
                 }
 
-                world.cycleBoosts();
+                world.cyclePowerUp();
             }
 
             if (gateOpen && !isKilling) {

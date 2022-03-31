@@ -29,7 +29,7 @@ public class World {
     private final ArrayList<BufferedImage> powerUps = new ArrayList<>(5);
 
     //Other
-    private int boostI = 0;
+    private int powerUpI = 0;
 
     private int score = 0;
     public int maxScore = 0;
@@ -158,16 +158,16 @@ public class World {
         updateScore();
     }
 
-    public void cycleBoosts() {
-        boostI = (boostI + 1) % 20;
+    public void cyclePowerUp() {
+        powerUpI = (powerUpI + 1) % 20;
 
-        if (boostI < 7) {
+        if (powerUpI < 7) {
             powerUp = powerUps.get(0);
-        } else if (boostI == 8 || boostI == 19) {
+        } else if (powerUpI == 8 || powerUpI == 19) {
             powerUp = powerUps.get(1);
-        } else if (boostI == 9 || boostI == 18) {
+        } else if (powerUpI == 9 || powerUpI == 18) {
             powerUp = powerUps.get(2);
-        } else if (boostI == 10 || boostI == 17) {
+        } else if (powerUpI == 10 || powerUpI == 17) {
             powerUp = powerUps.get(3);
         } else {
             powerUp = powerUps.get(4);
@@ -175,8 +175,6 @@ public class World {
     }
 
     private void placePowerUps() {
-        //todo place in sections
-
         Random random = new Random();
         ArrayList<Point> points = new ArrayList<>(tiles.keySet());
 
